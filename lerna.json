@@ -4,6 +4,8 @@
     "faros-airbyte-cdk",
     "faros-airbyte-common",
     "destinations/**",
-    "sources/**"
+    "sources/jira-source/**",
+    "sources/azure-repos-source/**",
+    "sources/azure-workitems-source/**"
   ]
 }
