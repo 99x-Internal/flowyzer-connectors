@@ -835,22 +835,26 @@ export class Jira {
     boardId: string,
     range?: [Date, Date]
   ): AsyncIterableIterator<AgileModels.Sprint> {
-    return this.iterate(
-      (startAt) =>
-        this.api.agile.board.getAllSprints({
-          boardId: Utils.parseInteger(boardId),
-          startAt,
-          maxResults: this.maxPageSize,
-        }),
-      async (item: AgileModels.Sprint) => {
-        const completeDate = Utils.toDate(item.completeDate);
-        // Ignore sprints completed before the input date range cutoff date
-        if (range && completeDate && completeDate < range[0]) {
-          return;
+    try {
+      return this.iterate(
+        (startAt) =>
+          this.api.agile.board.getAllSprints({
+            boardId: Utils.parseInteger(boardId),
+            startAt,
+            maxResults: this.maxPageSize,
+          }),
+        async (item: AgileModels.Sprint) => {
+          const completeDate = Utils.toDate(item.completeDate);
+          // Ignore sprints completed before the input date range cutoff date
+          if (range && completeDate && completeDate < range[0]) {
+            return;
+          }
+          return item;
         }
-        return item;
-      }
-    );
+      );
+    } catch (err: any) {
+      return;
+    }
   }
 
   getSprintsFromFarosGraph(

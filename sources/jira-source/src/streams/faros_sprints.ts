@@ -29,22 +29,32 @@ export class FarosSprints extends StreamWithBoardSlices {
     const boardId = streamSlice.board;
     const jira = await Jira.instance(this.config, this.logger);
     const board = await jira.getBoard(boardId);
-    if (board.type !== 'scrum') return;
+    this.logger.info('New - Board found: ' + JSON.stringify(board));
+    // if (board.type !== 'scrum') return;
     const updateRange =
       syncMode === SyncMode.INCREMENTAL
         ? this.getUpdateRange(streamState[boardId]?.cutoff)
         : undefined;
-    for await (const sprint of jira.getSprints(boardId, updateRange)) {
-      yield {
-        id: sprint.id,
-        originBoardId: sprint.originBoardId ?? toInteger(boardId),
-        name: sprint.name,
-        state: sprint.state,
-        startDate: sprint.startDate,
-        endDate: sprint.endDate,
-        completeDate: sprint.completeDate,
-        activatedDate: sprint['activatedDate'],
-      };
+    try {
+      for await (const sprint of jira.getSprints(boardId, updateRange)) {
+        if (sprint != null) {
+          this.logger.info('Sprint record found: ' + JSON.stringify(sprint));
+          yield {
+            id: sprint.id,
+            originBoardId: sprint.originBoardId ?? toInteger(boardId),
+            name: sprint.name,
+            state: sprint.state,
+            startDate: sprint.startDate,
+            endDate: sprint.endDate,
+            completeDate: sprint.completeDate,
+            activatedDate: sprint['activatedDate'],
+          };
+        }
+      }
+    } catch (err: any) {
+      this.logger.error(
+        `Error,${err.toString()}} found when reading the sprint from this board id:${boardId}`
+      );
     }
   }
 
