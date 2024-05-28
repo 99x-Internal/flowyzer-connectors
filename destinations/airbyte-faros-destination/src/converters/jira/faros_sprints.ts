@@ -1,4 +1,5 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {Sprint} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import {camelCase, toString, upperFirst} from 'lodash';
 
@@ -11,9 +12,12 @@ export class FarosSprints extends JiraConverter {
     record: AirbyteRecord,
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
-    const sprint = record.record.data;
+    const sprint = record.record.data as Sprint;
     const source = this.streamName.source;
-    const uid = toString(sprint.id);
+    const organizationName = this.getOrganizationFromUrl(sprint?.self);
+    const organization = {uid: organizationName, source};
+    ctx.logger.info(`Sprint data found: ${JSON.stringify(sprint)}`);
+    const uid = `${organizationName}|${toString(sprint.id)}`;
     return [
       {
         model: 'tms_Sprint',
@@ -26,6 +30,7 @@ export class FarosSprints extends JiraConverter {
           endedAt: Utils.toDate(sprint.endDate),
           closedAt: Utils.toDate(sprint.completeDate),
           source,
+          organization,
         },
       },
     ];

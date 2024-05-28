@@ -48,6 +48,7 @@ export class FarosSprints extends StreamWithBoardSlices {
             endDate: sprint.endDate,
             completeDate: sprint.completeDate,
             activatedDate: sprint['activatedDate'],
+            self: sprint.self,
           };
         }
       }

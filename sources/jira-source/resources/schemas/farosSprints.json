@@ -29,6 +29,9 @@
     "activatedDate": {
       "type": "string",
       "format": "date-time"
+    },
+    "self":{
+      "type":"string"
     }
   }
 }
