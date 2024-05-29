@@ -187,19 +187,6 @@ export class FarosIssues extends JiraConverter {
         },
       });
     }
-
-    for (const sprint of issue.sprintInfo?.history || []) {
-      results.push({
-        model: 'tms_Sprint',
-        record: {
-          task: {uid: issue.key, source},
-          sprint: {uid: sprint.uid, source},
-          addedAt: sprint.addedAt,
-          removedAt: sprint.removedAt,
-        },
-      });
-    }
-
     this.updateAncestors(issue);
     return results;
   }

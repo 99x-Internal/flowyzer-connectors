@@ -43,8 +43,12 @@ export class FarosIssuePullRequests extends StreamWithProjectSlices {
       true,
       [DEV_FIELD_NAME]
     )) {
+      this.logger.info('Issue id for checking for pull request: ' + issue.id);
       for (const pullRequest of (await jira.getIssuePullRequests(issue)) ||
         []) {
+        this.logger.info(
+          'Pull Request record - source found: ' + JSON.stringify(pullRequest)
+        );
         yield {
           issue: {
             key: issue.key,

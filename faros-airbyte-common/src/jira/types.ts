@@ -74,7 +74,7 @@ export enum RepoSource {
   GIT_FOR_JIRA_CLOUD = 'GitForJiraCloud',
   GITLAB = 'GitLab',
   VCS = 'VCS',
-  AZURE = 'AZURE-REPOS',
+  AZURE = 'AzureDevOps',
 }
 
 export interface Repo {
@@ -93,18 +93,13 @@ export interface PullRequest {
   readonly repo: Repo;
   readonly number: number;
   readonly issue?: PullRequestIssue;
-}
-
-export interface PullRequest {
-  readonly repo: Repo;
-  readonly number: number;
-  readonly issue?: PullRequestIssue;
   repoUrl: string;
   title: string;
   state: PullRequestState;
   origin: string;
   mergedAt: string;
   author: {uid: string; source: string};
+  organization?: string;
 }
 
 export interface PullRequestState {
