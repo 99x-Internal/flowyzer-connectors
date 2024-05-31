@@ -362,16 +362,25 @@ export abstract class AirbyteSourceBase<
         }
 
         if (!slice || maxSliceFailures == null) {
-          throw e;
+          // throw e;
+          this.logger.error(
+            `=======> Encountered a FATAL error while processing ${streamName} stream slice ${JSON.stringify(
+              slice
+            )}: ${e.message ?? JSON.stringify(e)}. Skipping Record and continuing...<========`,
+            e.stack
+          );
+          yield this.errorState(streamName, streamState, connectorState, e);
+          continue;
+        } else {
+          failedSlices.push(slice);
+          this.logger.error(
+            `Encountered an error while processing ${streamName} stream slice ${JSON.stringify(
+              slice
+            )}: ${e.message ?? JSON.stringify(e)}`,
+            e.stack
+          );
+          yield this.errorState(streamName, streamState, connectorState, e);
         }
-        failedSlices.push(slice);
-        this.logger.error(
-          `Encountered an error while processing ${streamName} stream slice ${JSON.stringify(
-            slice
-          )}: ${e.message ?? JSON.stringify(e)}`,
-          e.stack
-        );
-        yield this.errorState(streamName, streamState, connectorState, e);
         // -1 means unlimited allowed slice failures
         if (maxSliceFailures !== -1 && failedSlices.length > maxSliceFailures) {
           this.logger.error(
