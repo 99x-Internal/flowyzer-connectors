@@ -265,7 +265,7 @@ export class AzureRepos {
               '======>Found Commit: ',
               commit.commitId,
               ' for branch: ',
-              branch
+              branch.name
             );
             yield commit;
           }
