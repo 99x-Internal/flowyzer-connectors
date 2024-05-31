@@ -4,101 +4,6 @@ import {Dictionary} from 'ts-essentials';
 
 import {Converter, StreamContext} from '../converter';
 
-export interface Assignee {
-  readonly uid: string;
-  readonly assignedAt: Date;
-}
-
-export enum RepoSource {
-  BITBUCKET = 'Bitbucket',
-  GITHUB = 'GitHub',
-  GITLAB = 'GitLab',
-  VCS = 'VCS',
-  AZURE = 'AZURE-REPOS',
-}
-
-export interface Repo {
-  readonly source: RepoSource;
-  readonly org: string;
-  readonly name: string;
-}
-
-export interface PullRequest {
-  readonly repo: Repo;
-  readonly number: number;
-  repoUrl: string;
-  title: string;
-  state: PullRequestState;
-  origin: string;
-  mergedAt: string;
-  author: {uid: string; source: string};
-}
-
-export interface PullRequestStream {
-  id?: string;
-  updated: string;
-  branches?: any[];
-  _instance?: PullRequestInstance;
-  pullRequests?: PullRequestData[];
-  repositories?: [];
-}
-
-export interface PullRequestInstance {
-  id?: string;
-  name?: string;
-  type?: string;
-  baseUrl?: string;
-  typeName?: string;
-  singleInstance?: boolean;
-}
-
-export interface PullRequestData {
-  author?: PullRequestDataAuthor;
-  id?: string;
-  name?: string;
-  commentCount?: number;
-  source?: PullRequestDataBranchInfo;
-  destination?: PullRequestDataBranchInfo;
-  reviewers?: any[];
-  status?: string;
-  url?: string;
-  lastUpdate?: string;
-  repositoryId?: string;
-  repositoryName?: string;
-  repositoryUrl?: string;
-}
-
-export interface PullRequestDataAuthor {
-  name: string;
-  avatar: string;
-}
-
-export interface PullRequestDataBranchInfo {
-  branch: string;
-  url: string;
-}
-export interface PullRequestState {
-  category: PullRequestStateCategory;
-  detail: string;
-}
-
-export enum PullRequestStateCategory {
-  Closed = 'Closed',
-  Merged = 'Merged',
-  Open = 'Open',
-  Custom = 'Custom',
-}
-
-export interface Status {
-  readonly category: string;
-  readonly detail: string;
-}
-
-export interface StatusValue {
-  oldValue: string;
-  newValue: string;
-}
-
 export interface SprintIssue {
   id: number;
   key: string;
@@ -170,19 +75,5 @@ export abstract class JiraConverter extends Converter {
 
   protected useBoardOwnership(ctx: StreamContext): boolean {
     return this.jiraConfig(ctx).use_board_ownership ?? false;
-  }
-
-  protected getOrganizationFromUrl(url?: string): string {
-    if (url) {
-      const parts = url.split('/');
-      const username = parts[2].split('.')[0];
-      return username;
-    } else {
-      return '';
-    }
-  }
-
-  protected getRepoOrganizationFromUrl(url: string): string {
-    return url.split('/')[3];
   }
 }

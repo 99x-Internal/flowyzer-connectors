@@ -5,9 +5,9 @@
     "title": "Jira Configuration Spec",
     "type": "object",
     "required": [
-      "url","username","projects","sync_additional_fields"
+      "url"
     ],
-    "additionalProperties": false,
+    "additionalProperties": true,
     "properties": {
       "url": {
         "order": 1,
@@ -42,9 +42,9 @@
       "sync_additional_fields": {
         "order": 5,
         "type": "boolean",
-        "title": "Sync Additional Fields (Enable this option)",
+        "title": "Sync Additional Fields",
         "description": "Include additional fields on tasks.",
-        "default": true
+        "default": false
       },
       "additional_fields": {
         "order": 6,
@@ -188,6 +188,12 @@
         "title": "Graph name",
         "description": "The Faros graph name.",
         "default": "default"
+      },
+      "use_sprints_reverse_search": {
+        "order": 24,
+        "type": "boolean",
+        "title": "Fetch closed sprints starting with most recent in backlog. Use this for Jira instances with a lots closed sprints and syncing sprints is slow.",
+        "default": false
       }
     }
   }

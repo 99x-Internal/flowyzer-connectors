@@ -1,7 +1,8 @@
 type OptString = string | null | undefined;
+type OptBool = boolean | null | undefined;
 
 export interface BaseVulnerabilityType {
-  uid: OptString;
+  uid: string;
   displayName: OptString;
   createdAt: OptString;
   externalURL: OptString;
@@ -11,46 +12,43 @@ export interface BaseVulnerabilityType {
 export type ExtendedVulnerabilityType = BaseVulnerabilityType & {
   description?: OptString;
   externalIds?: OptString[];
+  vulnURL?: OptString;
   [key: string]: any;
 };
 
-export interface GithubSecurityAdvisory {
-  cveId: OptString;
-  description: OptString;
-  ghsaId: OptString;
+export interface GitV2Ignored {
+  ignoredAt: OptString;
+  ignoredUntil: OptString;
+  ignoreReason: OptString;
+  reactivateWhenFixable: OptBool;
 }
 
-export interface GithubVulnerabilityData {
-  createdAt: OptString;
+export interface GitV2Asset {
   displayName: OptString;
-  externalURL: OptString;
-  repositoryName: OptString;
-  severity: OptString;
-  slaDeadline: OptString;
-  uid: OptString;
-  vantaDescription: OptString;
-  securityAdvisory: GithubSecurityAdvisory;
+  assetType: OptString;
+  imageScanTag: OptString;
 }
 
-export interface AWSFindings {
-  description: OptString;
-  providerSeverity: OptString;
-  name: OptString;
-}
-
-export interface AWSVulnerabilityData {
+export interface GitV2VulnerabilityData {
+  uid: string;
+  displayName: OptString;
   createdAt: OptString;
+  externalURL: OptString;
+  severity: OptString;
+  relatedUrls: string[];
   packageName: OptString;
-  packageVersion: OptString;
-  externalURL: OptString;
-  scanType: OptString;
-  severity: OptString;
-  slaDeadline: OptString;
-  uid: OptString;
-  repositoryName: OptString;
-  repositoryArn: OptString;
-  displayName: OptString;
-  findings: AWSFindings[];
+  orgName: OptString;
+  name: OptString;
+  isFixable: OptBool;
+  duplicateVulnerabilityId: OptString;
+  description: OptString;
+  relatedCves: string[];
+  remediateBy: OptString;
+  packageIdentifier: OptString;
+  // This is normally the "CVE-xxxx-xxxx" string
+  externalVulnerabilityId: OptString;
+  ignored: GitV2Ignored;
+  asset: GitV2Asset;
 }
 
 export interface AWSV2Ignored {
@@ -64,27 +62,26 @@ export interface AWSV2Asset {
 }
 
 export interface AWSV2VulnerabilityData {
+  uid: string;
+  displayName: OptString;
   createdAt: OptString;
   externalURL: OptString;
+  severity: OptString;
+  externalVulnerabilityId: OptString;
   packageName: OptString;
   packageIdentifier: OptString;
-  scanType: OptString;
-  scannerScore: OptString;
-  severity: OptString;
-  uid: OptString;
   description: OptString;
-  displayName: OptString;
   name: OptString;
-  isFixable: OptString;
-  remediation: OptString;
+  isFixable: OptBool;
   remediateBy: OptString;
   asset: AWSV2Asset;
   ignored: AWSV2Ignored;
   imageTags: string[];
   imageDigest: OptString;
+  relatedUrls: string[];
 }
 
-export const vulnTypeOptions: string[] = ['git', 'aws', 'awsv2'];
+export const vulnTypeOptions: string[] = ['gitv2', 'awsv2'];
 
 export interface VcsOrgKey {
   uid: string;
@@ -110,3 +107,31 @@ export interface CicdArtifactKey {
   uid: string;
   repository: CicdRepoKey;
 }
+
+export type VulnerabilityKey = {
+  uid: string;
+  source: string;
+};
+
+export type VcsRepositoryVulnerabilityResponse = {
+  id: string;
+  resolvedAt: OptString;
+  vulnerability: VulnerabilityKey;
+  repository: VcsRepoKey;
+};
+
+export type CicdArtifactVulnerabilityResponse = {
+  id: string;
+  resolvedAt: OptString;
+  vulnerability: VulnerabilityKey;
+  artifact: CicdArtifactKey;
+};
+
+// All the keys have a single abstract type that can represent them:
+export type FarosObjectKey =
+  | VcsOrgKey
+  | VcsRepoKey
+  | CicdOrgKey
+  | CicdRepoKey
+  | CicdArtifactKey
+  | VulnerabilityKey;

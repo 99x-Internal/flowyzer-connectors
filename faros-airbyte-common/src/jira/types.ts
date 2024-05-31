@@ -74,7 +74,6 @@ export enum RepoSource {
   GIT_FOR_JIRA_CLOUD = 'GitForJiraCloud',
   GITLAB = 'GitLab',
   VCS = 'VCS',
-  AZURE = 'AZURE-REPOS',
 }
 
 export interface Repo {
@@ -95,44 +94,18 @@ export interface PullRequest {
   readonly issue?: PullRequestIssue;
 }
 
-export interface PullRequest {
-  readonly repo: Repo;
-  readonly number: number;
-  readonly issue?: PullRequestIssue;
-  repoUrl: string;
-  title: string;
-  state: PullRequestState;
-  origin: string;
-  mergedAt: string;
-  author: {uid: string; source: string};
-}
-
-export interface PullRequestState {
-  category: PullRequestStateCategory;
-  detail: string;
-}
-
-export enum PullRequestStateCategory {
-  Closed = 'Closed',
-  Merged = 'Merged',
-  Open = 'Open',
-  Custom = 'Custom',
-}
-
 export interface Sprint extends AgileModels.Sprint {
   // The date the sprint is opened in Jira Server
   readonly activatedDate?: string;
+  // Board sprint is associated that can be not originBoardId
+  // https://support.atlassian.com/jira-software-cloud/docs/view-and-understand-the-sprint-report/
+  readonly boardId: number;
 }
 
 export interface SprintReport {
-  readonly id: number;
-  readonly boardId?: string;
-  readonly closedAt?: Date;
-  readonly completedPoints?: number;
-  readonly completedInAnotherSprintPoints?: number;
-  readonly notCompletedPoints?: number;
-  readonly puntedPoints?: number;
-  readonly plannedPoints?: number;
+  readonly sprintId: number;
+  readonly boardId: string;
+  readonly completeDate: Date;
   readonly issues: SprintIssue[];
 }
 
@@ -151,4 +124,23 @@ export interface IssueField {
 
 export interface User extends Version2Models.User {
   id: string;
+}
+
+export interface Board extends AgileModels.Board {
+  uid: string;
+  projectKey: string;
+}
+
+export interface ProjectVersion extends Version2Models.Version {
+  projectKey: string;
+}
+
+export interface IssueProjectVersion {
+  readonly key: string;
+  readonly projectVersionId: string;
+}
+
+export interface FarosProject {
+  key: string;
+  boardUids: string[];
 }

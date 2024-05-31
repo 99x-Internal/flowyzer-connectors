@@ -45,7 +45,7 @@ import {
 } from './models';
 
 const DEFAULT_API_VERSION = '7.0';
-export const DEFAULT_BRANCH_PATTERN = '^master$';
+export const DEFAULT_BRANCH_PATTERN = '^main$';
 const DEFAULT_GRAPH_VERSION = '7.1-preview.1';
 export const DEFAULT_PAGE_SIZE = 100;
 export const DEFAULT_REQUEST_TIMEOUT = 60000;

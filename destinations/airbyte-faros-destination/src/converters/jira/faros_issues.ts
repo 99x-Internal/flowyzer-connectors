@@ -39,6 +39,7 @@ export class FarosIssues extends JiraConverter {
     'tms_Task',
     'tms_TaskAssignment',
     'tms_TaskDependency',
+    'tms_TaskProjectRelationship',
     'tms_TaskTag',
   ];
 
@@ -51,9 +52,7 @@ export class FarosIssues extends JiraConverter {
     const issue = record.record.data as Issue;
     const source = this.streamName.source;
     const results: DestinationRecord[] = [];
-    const organizationName = this.getOrganizationFromUrl(issue.url);
-    const organization = {uid: organizationName, source};
-    const issueUrl = issue.url;
+
     // For next-gen projects, epic should be parent of issue with issue
     // type Epic otherwise use the epic key from custom field in the issue
     const epicKey =
@@ -82,7 +81,7 @@ export class FarosIssues extends JiraConverter {
         issue.description,
         this.truncateLimit(ctx)
       ),
-      url: issueUrl,
+      url: issue.url,
       type: {
         category:
           typeCategories.get(JiraCommon.normalize(issue.type)) ?? 'Custom',
@@ -111,10 +110,17 @@ export class FarosIssues extends JiraConverter {
       resolutionStatus: issue.resolution,
       resolvedAt: issue.resolutionDate,
       sourceSystemId: issue.id,
-      organization,
     };
 
     results.push({model: 'tms_Task', record: task});
+
+    results.push({
+      model: 'tms_TaskProjectRelationship',
+      record: {
+        task: {uid: issue.key, source},
+        project: {uid: issue.project, source},
+      },
+    });
 
     if (JiraCommon.normalize(issue.type) === 'epic') {
       results.push({
@@ -190,7 +196,7 @@ export class FarosIssues extends JiraConverter {
 
     for (const sprint of issue.sprintInfo?.history || []) {
       results.push({
-        model: 'tms_Sprint',
+        model: 'tms_SprintHistory',
         record: {
           task: {uid: issue.key, source},
           sprint: {uid: sprint.uid, source},

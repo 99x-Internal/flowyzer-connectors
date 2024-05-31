@@ -50,23 +50,22 @@ export class Commits extends AzureReposConverter {
         repository,
       },
     });
-    if (commitItem?.branch) {
-      res.push({
-        model: 'vcs_BranchCommitAssociation',
-        record: {
-          commit: {
-            sha: commitItem.commitId,
-            uid: commitItem.commitId,
-            repository,
-          },
-          branch: {
-            name: commitItem.branch?.name,
-            uid: commitItem.branch?.name,
-            repository,
-          },
+    res.push({
+      model: 'vcs_BranchCommitAssociation',
+      record: {
+        commit: {
+          sha: commitItem.commitId,
+          uid: commitItem.commitId,
+          repository,
         },
-      });
-    }
+        branch: {
+          name: commitItem.branch?.name,
+          uid: commitItem.branch?.name,
+          repository,
+        },
+      },
+    });
+
     return res;
   }
 }
