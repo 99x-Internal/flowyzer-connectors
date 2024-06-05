@@ -1,7 +1,13 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "http://json-schema.org/draft-04/schema#",
   "type": "object",
-  "properties": { 
+  "properties": {
+    "id": {
+      "type": "integer"
+    },
+    "rev": {
+      "type": "integer"
+    },
     "fields": {
       "type": "object",
       "properties": {
@@ -342,15 +348,8 @@
         }
       }
     },
-    "id": {
-      "type": "string"
-    },
-    "rev": {
-      "type": "string"
-    },
     "url": {
       "type": "string"
     }
   }
 }
-

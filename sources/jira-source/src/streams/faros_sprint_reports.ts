@@ -11,12 +11,15 @@ export class FarosSprintReports extends StreamWithBoardSlices {
     return require('../../resources/schemas/farosSprintReports.json');
   }
 
+  // The Sprint Report is board-specific
+  // that is, it will only include issues that match your board's saved filter
+  // https://support.atlassian.com/jira-software-cloud/docs/view-and-understand-the-sprint-report
   get primaryKey(): StreamKey | undefined {
-    return 'id';
+    return ['sprintId', 'boardId'];
   }
 
   get cursorField(): string | string[] {
-    return ['closedAt'];
+    return ['completeDate'];
   }
 
   async *readRecords(
@@ -32,7 +35,8 @@ export class FarosSprintReports extends StreamWithBoardSlices {
     const updateRange =
       syncMode === SyncMode.INCREMENTAL
         ? this.getUpdateRange(streamState[boardId]?.cutoff)
-        : undefined;
+        : this.getUpdateRange();
+
     const sprints = this.supportsFarosClient()
       ? jira.getSprintsFromFarosGraph(
           boardId,
@@ -41,13 +45,10 @@ export class FarosSprintReports extends StreamWithBoardSlices {
           updateRange?.[0]
         )
       : jira.getSprints(boardId, updateRange);
-    for await (const sprint of sprints) {
+    for (const sprint of await sprints) {
       const report = await jira.getSprintReport(sprint, boardId);
       if (!report) continue;
-      yield {
-        ...report,
-        boardId,
-      };
+      yield report;
     }
   }
 
@@ -56,7 +57,7 @@ export class FarosSprintReports extends StreamWithBoardSlices {
     latestRecord: SprintReport
   ): StreamState {
     const board = latestRecord.boardId;
-    const latestRecordCutoff = Utils.toDate(latestRecord.closedAt);
+    const latestRecordCutoff = Utils.toDate(latestRecord.completeDate);
     return this.getUpdatedStreamState(
       latestRecordCutoff,
       currentStreamState,

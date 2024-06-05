@@ -5,6 +5,7 @@ import {omit} from 'lodash';
 import {Dictionary} from 'ts-essentials';
 
 import {Jira} from '../jira';
+import {JqlBuilder} from '../jql-builder';
 import {
   ProjectStreamSlice,
   StreamState,
@@ -38,15 +39,19 @@ export class FarosIssues extends StreamWithProjectSlices {
       const updateRange =
         syncMode === SyncMode.INCREMENTAL
           ? this.getUpdateRange(streamState?.[this.projectKey]?.cutoff)
-          : undefined;
-      for await (const issue of jira.getIssues(this.projectKey, updateRange)) {
-        logger.info('Issue Record received from source');
-        logger.info('Processing record:', JSON.stringify(issue));
+          : this.getUpdateRange();
+
+      for await (const issue of jira.getIssues(
+        new JqlBuilder()
+          .withProject(this.projectKey)
+          .withDateRange(updateRange)
+          .build()
+      )) {
         yield omit(issue, 'fields');
       }
     } catch (err: any) {
       logger?.warn(
-        `Failed to get issue :${err},stream slice : ${streamSlice}},project_key:${this.projectKey}`
+        `Failed to get issue :${err}, stream slice: ${streamSlice},project_key: ${this.projectKey}`
       );
     }
   }

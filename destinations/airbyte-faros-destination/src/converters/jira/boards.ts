@@ -14,7 +14,6 @@ export class Boards extends JiraConverter {
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
     if (!this.useBoardOwnership(ctx)) return [];
-
     const board = record.record.data;
     const uid = board.id.toString();
     const source = this.streamName.source;
@@ -23,7 +22,7 @@ export class Boards extends JiraConverter {
     return [
       {
         model: 'tms_TaskBoard',
-        record: {uid, name: board.name, organization},
+        record: {uid, name: board.name, organization, source},
       },
       {
         model: 'tms_TaskBoardProjectRelationship',

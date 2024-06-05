@@ -34,20 +34,22 @@ export class FarosSprints extends StreamWithBoardSlices {
     const updateRange =
       syncMode === SyncMode.INCREMENTAL
         ? this.getUpdateRange(streamState[boardId]?.cutoff)
-        : undefined;
+        : this.getUpdateRange();
+
     try {
-      for await (const sprint of jira.getSprints(boardId, updateRange)) {
+      for (const sprint of await jira.getSprints(boardId, updateRange)) {
         if (sprint != null) {
           this.logger.info('Sprint record found: ' + JSON.stringify(sprint));
           yield {
             id: sprint.id,
-            originBoardId: sprint.originBoardId ?? toInteger(boardId),
+            originBoardId: sprint.originBoardId,
             name: sprint.name,
             state: sprint.state,
             startDate: sprint.startDate,
             endDate: sprint.endDate,
             completeDate: sprint.completeDate,
             activatedDate: sprint['activatedDate'],
+            boardId: toInteger(boardId),
             self: sprint.self,
           };
         }
@@ -63,7 +65,7 @@ export class FarosSprints extends StreamWithBoardSlices {
     currentStreamState: StreamState,
     latestRecord: Sprint
   ): StreamState {
-    const board = toString(latestRecord.originBoardId);
+    const board = toString(latestRecord.boardId);
     const latestRecordCutoff = Utils.toDate(latestRecord.completeDate);
     return this.getUpdatedStreamState(
       latestRecordCutoff,

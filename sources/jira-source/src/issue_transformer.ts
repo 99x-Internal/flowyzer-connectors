@@ -13,6 +13,7 @@ import {
   isNil,
   isPlainObject,
   isString,
+  toInteger,
   toLower,
   toString,
 } from 'lodash';
@@ -366,6 +367,8 @@ export class IssueTransformer {
             startDate: sprint.startDate,
             endDate: sprint.endDate,
             completeDate: sprint.completeDate,
+            activatedDate: sprint['activatedDate'],
+            self: sprint.self,
           });
         }
       }
@@ -487,7 +490,7 @@ export class IssueTransformer {
       assignees: assigneeChangelog,
       points: this.getPoints(item) ?? undefined,
       epic: this.getIssueEpic(item),
-      // sprintInfo,
+      sprintInfo,
       additionalFields,
       url: `${this.baseURL.replace(/\/$/, '')}/browse/${item.key}`,
       resolution: item.fields.resolution?.name,

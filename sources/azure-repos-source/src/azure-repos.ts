@@ -45,7 +45,7 @@ import {
 } from './models';
 
 const DEFAULT_API_VERSION = '7.0';
-export const DEFAULT_BRANCH_PATTERN = '^master$';
+export const DEFAULT_BRANCH_PATTERN = '^main$';
 const DEFAULT_GRAPH_VERSION = '7.1-preview.1';
 export const DEFAULT_PAGE_SIZE = 100;
 export const DEFAULT_REQUEST_TIMEOUT = 60000;
@@ -252,6 +252,7 @@ export class AzureRepos {
     for (const project of this.projects) {
       for (const repository of await this.listRepositories(project)) {
         for (const branch of await this.listBranches(project, repository)) {
+          console.log('=========> Sourcing Commits for Branch: ', branch.name);
           for await (const commit of this.listCommits(
             project,
             repository,
@@ -259,7 +260,13 @@ export class AzureRepos {
             sinceDate > cutoffDate ? sinceDate : cutoffDate
           )) {
             commit.repository = repository as CommitRepository;
-            commit.branch = branch;
+            commit.branch = branch as Branch;
+            console.log(
+              '======>Found Commit: ',
+              commit.commitId,
+              ' for branch: ',
+              branch.name
+            );
             yield commit;
           }
         }

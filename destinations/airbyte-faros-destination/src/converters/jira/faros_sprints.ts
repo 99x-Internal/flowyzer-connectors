@@ -7,7 +7,10 @@ import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
 
 export class FarosSprints extends JiraConverter {
-  readonly destinationModels: ReadonlyArray<DestinationModel> = ['tms_Sprint'];
+  readonly destinationModels: ReadonlyArray<DestinationModel> = [
+    'tms_Sprint',
+    // 'tms_SprintBoardRelationship', // Sprint board does not exist in Faros schema at the moment
+  ];
   async convert(
     record: AirbyteRecord,
     ctx: StreamContext
@@ -33,6 +36,13 @@ export class FarosSprints extends JiraConverter {
           organization,
         },
       },
+      // {
+      //   model: 'tms_SprintBoardRelationship',
+      //   record: {
+      //     sprint: {uid, source},
+      //     board: {uid: toString(sprint.boardId), source},
+      //   },
+      // },
     ];
   }
 }

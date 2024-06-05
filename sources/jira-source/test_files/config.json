@@ -1,8 +1,8 @@
 {
   "url": "https://jira.com",
-  "username": "suren.mywork@gmail.com",
-  "password": "intel@123",
-  "projects": ["FJT"],
+  "username": "user",
+  "password": "pass",
+  "projects": ["TEST"],
   "bucket_id": 1,
   "bucket_total": 1,
   "additional_fields": [],

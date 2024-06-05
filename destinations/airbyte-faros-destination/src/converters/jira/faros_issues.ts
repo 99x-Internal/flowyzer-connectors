@@ -39,6 +39,7 @@ export class FarosIssues extends JiraConverter {
     'tms_Task',
     'tms_TaskAssignment',
     'tms_TaskDependency',
+    'tms_TaskProjectRelationship',
     'tms_TaskTag',
   ];
 
@@ -51,9 +52,10 @@ export class FarosIssues extends JiraConverter {
     const issue = record.record.data as Issue;
     const source = this.streamName.source;
     const results: DestinationRecord[] = [];
-    const organizationName = this.getOrganizationFromUrl(issue.url);
-    const organization = {uid: organizationName, source};
     const issueUrl = issue.url;
+    const organizationName = this.getOrganizationFromUrl(issueUrl);
+    const organization = {uid: organizationName, source};
+
     // For next-gen projects, epic should be parent of issue with issue
     // type Epic otherwise use the epic key from custom field in the issue
     const epicKey =
@@ -115,6 +117,14 @@ export class FarosIssues extends JiraConverter {
     };
 
     results.push({model: 'tms_Task', record: task});
+
+    results.push({
+      model: 'tms_TaskProjectRelationship',
+      record: {
+        task: {uid: issue.key, source},
+        project: {uid: issue.project, source},
+      },
+    });
 
     if (JiraCommon.normalize(issue.type) === 'epic') {
       results.push({

@@ -516,8 +516,18 @@ export class FarosDestination extends AirbyteDestination<DestinationConfig> {
       );
 
       if (dryRunEnabled) {
+        let recWriter;
         this.logger.info("Dry run is ENABLED. Won't write any records");
-
+        if (config.log_records) {
+          this.logger.info('Will log converted records');
+          recWriter = new Writable({
+            objectMode: true,
+            write: (chunk, encoding, callback) => {
+              this.logger.write(AirbyteRecord.make('dry_run', chunk));
+              callback();
+            },
+          });
+        }
         for await (const stateMessage of this.writeEntries(
           config,
           streamContext,
@@ -525,7 +535,8 @@ export class FarosDestination extends AirbyteDestination<DestinationConfig> {
           streams,
           converterDependencies,
           stats as WriteStatsWithRecord,
-          syncErrors
+          syncErrors,
+          recWriter
         )) {
           latestStateMessage = stateMessage;
         }
@@ -782,6 +793,7 @@ export class FarosDestination extends AirbyteDestination<DestinationConfig> {
                   syncErrors.warnings.push(syncMessage);
                 }
               }
+              stateMessage = new AirbyteStateMessage(msg.state);
             } else if (isSourceConfigMessage(msg)) {
               await updateLocalAccount?.(msg);
             } else if (isSourceLogsMessage(msg)) {
@@ -930,24 +942,20 @@ export class FarosDestination extends AirbyteDestination<DestinationConfig> {
   }
 
   async handleRecordProcessingError(
-    stats: any,
+    stats: WriteStats,
     processRecord: () => Promise<void>
   ): Promise<void> {
     try {
       await processRecord();
     } catch (e: any) {
-      const statObj = stats as WriteStatsWithRecord;
-      statObj.recordsErrored++;
+      stats.recordsErrored++;
       this.logger.error(
         `Error processing input: ${e.message ?? JSON.stringify(e)}`,
         e.stack
       );
-      this.logger.error(
-        `Current record: ${JSON.stringify(statObj.currentRecord, null, 2)}`
-      );
       switch (this.invalidRecordStrategy) {
         case InvalidRecordStrategy.SKIP:
-          statObj.recordsSkipped++;
+          stats.recordsSkipped++;
           break;
         case InvalidRecordStrategy.FAIL:
           throw e;

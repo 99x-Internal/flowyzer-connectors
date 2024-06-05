@@ -27,18 +27,23 @@ export const runAllZScoreTests: GraphDoctorTestFunction = async function* (
     ['cal_Event', 'cal_Calendar', 'cal_User'],
     ['cicd_Deployment'],
     ['cicd_Build', 'cicd_BuildCommitAssociation'],
-    ['cicd_Artifact', 'cicd_ArtifactCommitAssociation'],
+    [
+      'cicd_Artifact',
+      'cicd_ArtifactCommitAssociation',
+      'cicd_ArtifactVulnerability',
+    ],
     ['cicd_Organization', 'cicd_Repository'],
     ['compute_Application', 'compute_Instance', 'compute_Volume'],
     ['faros_Tag'],
     ['ims_Incident', 'ims_IncidentEvent'],
     ['qa_TestExecution'],
+    ['sec_Vulnerability'],
     ['tms_Task', 'tms_Project', 'tms_Epic'],
-    ['vcs_RepositoryContribution'],
+    ['vcs_RepositoryContribution', 'vcs_RepositoryVulnerability'],
     ['vcs_Commit'],
     ['vcs_PullRequest'],
   ];
-  const base_model_query = `{QUERY_NAME}(order_by: {refreshedAt: desc}, limit: {AMOUNT}, distinct_on: refreshedAt) {
+  const base_model_query = `{MODEL_NAME}(order_by: {refreshedAt: desc}, limit: {AMOUNT}) {
     refreshedAt,
     id
   }`;
@@ -217,7 +222,7 @@ function substitute_strings_into_queries(
   modelName: string,
   amt: number
 ): string {
-  let op_str = query_str.replace('{QUERY_NAME}', modelName);
+  let op_str = query_str.replace('{MODEL_NAME}', modelName);
   op_str = op_str.replace('{AMOUNT}', amt.toString());
   return op_str;
 }
@@ -370,7 +375,7 @@ export const checkIfWithinLastXDays: GraphDoctorTestFunction = async function* (
     `Starting to compute if objects appeared within the last ${days} days for models: ${model_test_list}`
   );
 
-  const base_model_query = `{QUERY_NAME}(order_by: {refreshedAt: desc}, limit: {AMOUNT}, distinct_on: refreshedAt) {
+  const base_model_query = `{MODEL_NAME}(order_by: {refreshedAt: desc}, limit: {AMOUNT}) {
     refreshedAt,
     id
   }`;
