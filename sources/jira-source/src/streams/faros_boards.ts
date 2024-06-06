@@ -27,17 +27,18 @@ export class FarosBoards extends StreamWithProjectSlices {
     this.projectKey = streamSlice?.project;
 
     // Virtual board to represent all tasks in the project without a board
-    yield {
-      uid: `faros-tasks-with-no-board-${this.projectKey}`,
-      name: `Tasks without a board in project ${this.projectKey}`,
-      projectKey: this.projectKey,
-    };
+    // yield {
+    //   uid: `faros-tasks-with-no-board-${this.projectKey}`,
+    //   name: `Tasks without a board in project ${this.projectKey}`,
+    //   projectKey: this.projectKey,
+    // };
 
     for (const board of await jira.getBoards(this.projectKey)) {
       yield {
         ...pick(board, ['id', 'name', 'type']),
         uid: toString(board.id),
         projectKey: this.projectKey,
+        self: board.self,
       };
     }
   }

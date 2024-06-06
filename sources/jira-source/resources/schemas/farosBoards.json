@@ -15,6 +15,9 @@
         "kanban",
         "simple"
       ]
+    },
+    "self":{
+      "type":"string"
     }
   }
 }
