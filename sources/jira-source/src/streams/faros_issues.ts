@@ -47,6 +47,9 @@ export class FarosIssues extends StreamWithProjectSlices {
           .withDateRange(updateRange)
           .build()
       )) {
+        logger?.info(
+          'Issue received from the source: ' + JSON.stringify(issue)
+        );
         yield omit(issue, 'fields');
       }
     } catch (err: any) {

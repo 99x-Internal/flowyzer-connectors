@@ -749,7 +749,7 @@ export class Jira {
     }
   }
 
-  private memoizeIssue(item: any, jql: string) {
+  private memoizeIssue(item: any, jql: string): void {
     const issue: IssueCompact = {
       id: item.id,
       key: item.key,
@@ -862,7 +862,7 @@ export class Jira {
     return {fieldIds: Array.from(fieldIds), additionalFieldIds};
   }
 
-  private requestedFarosIssuesStream() {
+  private requestedFarosIssuesStream(): boolean {
     return this.requestedStreams?.has('faros_issues');
   }
 

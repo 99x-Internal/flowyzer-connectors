@@ -1,7 +1,7 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Issue} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
-import {isNil, pick} from 'lodash';
+import {camelCase, isNil, pick, upperFirst} from 'lodash';
 
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraCommon, JiraConverter} from './common';
@@ -77,6 +77,19 @@ export class FarosIssues extends JiraConverter {
       });
     }
 
+    //Complete sprint data
+    const sprintData = {
+      uid: `${organizationName}|${issue.sprintInfo.currentSprintId}`,
+      name: issue.sprintInfo.name,
+      state: upperFirst(camelCase(issue.sprintInfo.state)),
+      startedAt: Utils.toDate(issue.sprintInfo.startDate),
+      openedAt: Utils.toDate(issue.sprintInfo.createdDate),
+      endedAt: Utils.toDate(issue.sprintInfo.endDate),
+      closedAt: Utils.toDate(issue.sprintInfo.completeDate),
+      source,
+      organization,
+    };
+
     const task = {
       uid: issue.key,
       name: issue.summary,
@@ -105,9 +118,7 @@ export class FarosIssues extends JiraConverter {
       creator: issue.creator ? {uid: issue.creator, source} : undefined,
       parent: issue.parent ? {uid: issue.parent.key, source} : undefined,
       epic: epicKey ? {uid: epicKey, source} : undefined,
-      sprint: issue.sprintInfo?.currentSprintId
-        ? {uid: issue.sprintInfo.currentSprintId, source}
-        : undefined,
+      sprint: issue.sprintInfo?.currentSprintId ? sprintData : undefined,
       source,
       additionalFields,
       resolutionStatus: issue.resolution,
@@ -115,7 +126,9 @@ export class FarosIssues extends JiraConverter {
       sourceSystemId: issue.id,
       organization,
     };
-
+    ctx.logger.info(
+      'Task received from Faros Destination: ' + JSON.stringify(task)
+    );
     results.push({model: 'tms_Task', record: task});
 
     results.push({

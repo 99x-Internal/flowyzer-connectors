@@ -66,6 +66,14 @@ export interface SprintHistory {
 export interface SprintInfo {
   readonly currentSprintId: string;
   readonly history: ReadonlyArray<SprintHistory>;
+  state: string;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  completeDate: Date;
+  createdDate: Date;
+  id: number;
+  uid?: string;
 }
 
 export enum RepoSource {
