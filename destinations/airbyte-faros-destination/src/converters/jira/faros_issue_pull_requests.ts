@@ -46,6 +46,7 @@ export class FarosIssuePullRequests extends JiraConverter {
           task: {
             uid: `${pullRequest.issue.key}`,
             source,
+            organization,
           },
           pullRequest: {
             uid: `${pullRequest.issue.key}`,
