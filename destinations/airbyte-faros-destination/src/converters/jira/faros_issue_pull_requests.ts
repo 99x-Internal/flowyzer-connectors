@@ -56,6 +56,7 @@ export class FarosIssuePullRequests extends JiraConverter {
               name: toLower(pullRequest.repo.name),
             },
             number: pullRequest.number,
+            origin: 'jira',
           },
         },
       },
