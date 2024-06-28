@@ -8,6 +8,9 @@
     "name": {
       "type": "string"
     },
+    "location":{
+      "type":"object"
+    },
     "type": {
       "type": "string",
       "enum": [

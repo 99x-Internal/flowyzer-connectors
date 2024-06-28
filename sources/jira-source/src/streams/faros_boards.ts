@@ -35,7 +35,7 @@ export class FarosBoards extends StreamWithProjectSlices {
 
     for (const board of await jira.getBoards(this.projectKey)) {
       yield {
-        ...pick(board, ['id', 'name', 'type']),
+        ...pick(board, ['id', 'name', 'type', 'location']),
         uid: toString(board.id),
         projectKey: this.projectKey,
         self: board.self,

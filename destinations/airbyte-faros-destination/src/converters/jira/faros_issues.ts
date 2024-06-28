@@ -125,6 +125,7 @@ export class FarosIssues extends JiraConverter {
       resolvedAt: issue.resolutionDate,
       sourceSystemId: issue.id,
       organization,
+      project: {uid: issue.key.split('-')[0], organization},
     };
     ctx.logger.info(
       'Task received from Faros Destination: ' + JSON.stringify(task)

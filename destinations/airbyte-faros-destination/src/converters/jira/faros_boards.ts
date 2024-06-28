@@ -19,13 +19,25 @@ export class FarosBoards extends JiraConverter {
       'Board data received from destination: ' + JSON.stringify(board)
     );
     const uid = toString(board.id);
+    if (!uid) return;
     const source = this.streamName.source;
     const organizationName = this.getOrganizationFromUrl(board.self);
     const organization = {uid: organizationName, source};
+    ctx.logger.info(
+      'Board data received from Destination:' + JSON.stringify(board)
+    );
+    const projectKey = board?.location?.projectKey;
     return [
       {
         model: 'tms_TaskBoard',
-        record: {uid, name: board.name, organization, source},
+        record: {
+          uid,
+          name: board.name,
+          type: board.type,
+          organization,
+          source,
+          project: {uid: projectKey, organization},
+        },
       },
       {
         model: 'tms_TaskBoardProjectRelationship',

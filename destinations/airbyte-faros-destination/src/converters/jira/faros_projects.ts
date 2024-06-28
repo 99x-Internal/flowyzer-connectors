@@ -1,4 +1,5 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {Project} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import {toString} from 'lodash';
 
@@ -12,9 +13,11 @@ export class FarosProjects extends JiraConverter {
     record: AirbyteRecord,
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
-    const project = record.record.data;
+    const project = record.record.data as Project;
     ctx.logger.info('Project Found :' + JSON.stringify(project));
     const source = this.streamName.source;
+    const organizationName = this.getOrganizationFromUrl(project.self);
+    const organization = {uid: organizationName, source};
     return [
       {
         model: 'tms_Project',
@@ -27,6 +30,7 @@ export class FarosProjects extends JiraConverter {
           ),
           sourceSystemId: project.id,
           source,
+          organization,
         },
       },
     ];

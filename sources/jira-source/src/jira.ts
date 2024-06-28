@@ -580,6 +580,7 @@ export class Jira {
         name: item.name,
         description: item.description,
         type: item.type,
+        self: item.self,
       })
     );
     for await (const project of projects) {

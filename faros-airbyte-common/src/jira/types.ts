@@ -212,6 +212,10 @@ export interface Board extends AgileModels.Board {
   projectKey: string;
 }
 
+export interface Project extends AgileModels.Project {
+  self: string;
+  description: string;
+}
 export interface ProjectVersion extends Version2Models.Version {
   projectKey: string;
 }

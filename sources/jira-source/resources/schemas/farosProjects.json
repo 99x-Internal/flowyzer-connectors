@@ -13,6 +13,9 @@
     },
     "description": {
       "type": "string"
+    },
+    "self":{
+      "type":"string"
     }
   }
 }
