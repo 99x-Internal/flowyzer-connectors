@@ -70,7 +70,6 @@ export class Workitems extends AzureWorkitemsConverter {
       model: 'tms_Task',
       record: {
         uid: String(WorkItem?.id),
-        id: String(WorkItem?.id),
         url: WorkItem?.url,
         type: {
           category: String(WorkItem?.fields['System.WorkItemType']),
@@ -82,7 +81,7 @@ export class Workitems extends AzureWorkitemsConverter {
               uid: `${String(WorkItem?.fields['System.Parent'])}`,
               organization,
             }
-          : '',
+          : null,
         description: WorkItem?.fields['System.Description'],
         status: {category: WorkItem?.fields['System.State']},
         statusChangedAt: WorkItem?.fields[
@@ -96,21 +95,16 @@ export class Workitems extends AzureWorkitemsConverter {
           : null,
         creator: {
           uid: `${WorkItem?.fields['System.CreatedBy']['uniqueName']}`,
-          source,
           organization,
         },
         sprint: {
           uid: `${String(WorkItem?.fields['System.IterationId'])}`,
-          source,
           organization,
         },
         source,
         organization,
       },
     });
-    ctx.logger.info('Uid:' + String(WorkItem?.id));
-    ctx.logger.info('Organization:' + JSON.stringify(organization));
-    ctx.logger.info('Source:' + JSON.stringify(source));
     results.push({
       model: 'tms_TaskAssignment',
       record: {
