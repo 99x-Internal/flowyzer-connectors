@@ -1,3 +1,5 @@
+import {emailAddress} from 'redact-pii/lib/built-ins/simple-regexp-patterns';
+
 import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {AzureWorkitemsConverter} from './common';
@@ -53,6 +55,7 @@ export class Workitems extends AzureWorkitemsConverter {
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
     const source = this.streamName.source;
+    const results: DestinationRecord[] = [];
     const WorkItem = record.record.data as CustomWorkItem;
     const organizationName = this.getOrganizationFromUrl(WorkItem?.url);
     const organization = {uid: organizationName, source};
@@ -60,73 +63,77 @@ export class Workitems extends AzureWorkitemsConverter {
       'Workitem ID:' +
         WorkItem?.id +
         ' =====> Organization extracted:' +
-        JSON.stringify(organization)
+        JSON.stringify(organizationName)
     );
     const statusChangelog = this.statusChangelog(WorkItem);
-
-    return [
-      {
-        model: 'tms_Task',
-        record: {
-          uid: String(WorkItem?.id),
-          id: String(WorkItem?.id),
-          url: WorkItem?.url,
-          type: {
-            category: String(WorkItem?.fields['System.WorkItemType']),
-          },
-          name: WorkItem?.fields['System.Title'],
-          createdAt: new Date(WorkItem?.fields['System.CreatedDate']),
-          parent: {
-            uid: String(WorkItem?.fields['System.Parent']),
-            source,
-          },
-          description: WorkItem?.fields['System.Description'],
-          status: {category: WorkItem?.fields['System.State']},
-          statusChangedAt: WorkItem?.fields[
-            'Microsoft.VSTS.Common.StateChangeDate'
-          ]
-            ? new Date(
-                WorkItem?.fields['Microsoft.VSTS.Common.StateChangeDate']
-              )
-            : null,
-          statusChangelog: statusChangelog,
-          updatedAt: WorkItem?.fields['Microsoft.VSTS.Common.StateChangeDate']
-            ? new Date(
-                WorkItem?.fields['Microsoft.VSTS.Common.StateChangeDate']
-              )
-            : null,
-          creator: {
-            uid: WorkItem?.fields['System.CreatedBy']['uniqueName'],
-            source,
-          },
-          sprint: {
-            uid: String(WorkItem?.fields['System.IterationId']),
-            source,
-            organization,
-          },
+    results.push({
+      model: 'tms_Task',
+      record: {
+        uid: String(WorkItem?.id),
+        id: String(WorkItem?.id),
+        url: WorkItem?.url,
+        type: {
+          category: String(WorkItem?.fields['System.WorkItemType']),
+        },
+        name: WorkItem?.fields['System.Title'],
+        createdAt: new Date(WorkItem?.fields['System.CreatedDate']),
+        parent: WorkItem?.fields['System.Parent']
+          ? {
+              uid: `${String(WorkItem?.fields['System.Parent'])}`,
+              organization,
+            }
+          : '',
+        description: WorkItem?.fields['System.Description'],
+        status: {category: WorkItem?.fields['System.State']},
+        statusChangedAt: WorkItem?.fields[
+          'Microsoft.VSTS.Common.StateChangeDate'
+        ]
+          ? new Date(WorkItem?.fields['Microsoft.VSTS.Common.StateChangeDate'])
+          : null,
+        statusChangelog: statusChangelog,
+        updatedAt: WorkItem?.fields['Microsoft.VSTS.Common.StateChangeDate']
+          ? new Date(WorkItem?.fields['Microsoft.VSTS.Common.StateChangeDate'])
+          : null,
+        creator: {
+          uid: `${WorkItem?.fields['System.CreatedBy']['uniqueName']}`,
           source,
           organization,
         },
-      },
-      {
-        model: 'tms_TaskAssignment',
-        record: {
-          task: {uid: String(WorkItem?.id), source},
-          assignee: {
-            uid:
-              WorkItem?.fields['System.AssignedTo']?.uniqueName || 'Unassigned',
-            organization,
-          },
+        sprint: {
+          uid: `${String(WorkItem?.fields['System.IterationId'])}`,
           source,
+          organization,
         },
-      }, // ,
-      // {
-      //   model: 'tms_TaskProjectRelationship',
-      //   record: {
-      //     task: {uid: String(WorkItem?.item?.id), source},
-      //     project: {uid: WorkItem?.item?.name, source},
-      //   },
-      // },
-    ];
+        source,
+        organization,
+      },
+    });
+    ctx.logger.info('Uid:' + String(WorkItem?.id));
+    ctx.logger.info('Organization:' + JSON.stringify(organization));
+    ctx.logger.info('Source:' + JSON.stringify(source));
+    results.push({
+      model: 'tms_TaskAssignment',
+      record: {
+        task: {
+          uid: `${String(WorkItem?.id)}`,
+          organization,
+        },
+        assignee: {
+          uid:
+            `${WorkItem?.fields['System.CreatedBy']['uniqueName']}` ||
+            `Unassigned`,
+          organization,
+        },
+        source,
+      },
+    });
+    // results.push({
+    //   model: 'tms_TaskProjectRelationship',
+    //   record: {
+    //     task: { uid: `${organizationName}|${String(WorkItem?.id)}`, source,organization },
+    //     project: { uid: `${organizationName}|${WorkItem?.fields?.["System.TeamProject"]}`, source },
+    //   },
+    // });
+    return results;
   }
 }

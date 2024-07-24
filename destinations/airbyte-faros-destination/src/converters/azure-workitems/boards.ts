@@ -6,6 +6,7 @@ import {Board} from './models';
 export class Boards extends AzureWorkitemsConverter {
   readonly destinationModels: ReadonlyArray<DestinationModel> = [
     'tms_TaskBoard',
+    'tms_Project',
   ];
 
   async convert(
@@ -16,13 +17,13 @@ export class Boards extends AzureWorkitemsConverter {
     const organizationName = this.getOrganizationFromUrl(board.url);
     const organization = {uid: organizationName, source};
     const results = [];
-    const uid = board.id;
 
     results.push({
       model: 'tms_Project',
       record: {
-        uid,
+        uid: String(board.id),
         name: board.name,
+        source,
         organization,
       },
     });
@@ -33,6 +34,7 @@ export class Boards extends AzureWorkitemsConverter {
         uid: String(board.id),
         name: board.name,
         organization,
+        source,
       },
     });
 
