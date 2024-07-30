@@ -1,4 +1,14 @@
-import axios from 'axios';
+import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {
+  Assignee,
+  PullRequest,
+  PullRequestState,
+  PullRequestStateCategory,
+  PullRequestStream,
+  Repo,
+  RepoSource,
+  Status,
+} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import parseGitUrl from 'git-url-parse';
 import {
@@ -13,28 +23,13 @@ import {
 import {Dictionary} from 'ts-essentials';
 import TurndownService from 'turndown';
 
-import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
-import {
-  Assignee,
-  PullRequest,
-  PullRequestState,
-  PullRequestStateCategory,
-  Repo,
-  RepoSource,
-  Status,
-} from '../../../../../faros-airbyte-common/lib/jira';
 import {
   DestinationModel,
   DestinationRecord,
   StreamContext,
   StreamName,
 } from '../converter';
-import {
-  JiraCommon,
-  JiraConverter,
-  PullRequestStream,
-  StatusValue,
-} from './common';
+import {JiraCommon, JiraConverter} from './common';
 
 const dependencyRegex = /((is (?<type>\w+))|tested) by/;
 const sprintRegex = /([\w]+)=([\w-:. ]+)/g;
@@ -45,9 +40,9 @@ const typeCategories: ReadonlyMap<string, string> = new Map(
   ['Bug', 'Story', 'Task'].map((t) => [JiraCommon.normalize(t), t])
 );
 
-interface IssueStatusChange {
-  readonly status: StatusValue;
-  readonly changedAt: string;
+interface StatusChange {
+  readonly status: Status;
+  readonly changedAt: Date;
 }
 
 export class Issues extends JiraConverter {
@@ -205,29 +200,31 @@ export class Issues extends JiraConverter {
   }
 
   private statusChangelog(
-    changelog: ReadonlyArray<any>
-  ): ReadonlyArray<IssueStatusChange> {
-    const statusChangelog: Array<IssueStatusChange> = [];
+    changelog: ReadonlyArray<any>,
+    currentStatus: string,
+    created: Date
+  ): ReadonlyArray<StatusChange> {
+    const statusChangelog: Array<StatusChange> = [];
 
-    const pushStatusChange = (
-      oldValue: string,
-      newValue: string,
-      date: Date
-    ): void => {
-      const status = {
-        newValue: newValue,
-        oldValue: oldValue,
-      };
-      const isoDateString = new Date(date).toISOString();
-      if (status) statusChangelog.push({status, changedAt: isoDateString});
+    const pushStatusChange = (statusName: string, date: Date): void => {
+      const status = this.statusByName[statusName];
+      if (status) statusChangelog.push({status, changedAt: date});
     };
 
     const statusChanges = Issues.fieldChangelog(changelog, 'status');
 
     if (statusChanges.length) {
-      for (const change of statusChanges) {
-        pushStatusChange(change.value, change.from, change.changed);
+      // status that was assigned at creation
+      const firstChange = statusChanges[0];
+      if (firstChange.from) {
+        pushStatusChange(firstChange.from, created);
       }
+      for (const change of statusChanges) {
+        pushStatusChange(change.value, change.changed);
+      }
+    } else if (currentStatus) {
+      // if task was given status at creation and never changed
+      pushStatusChange(currentStatus, created);
     }
     return statusChangelog;
   }
@@ -412,7 +409,7 @@ export class Issues extends JiraConverter {
         branchToRepoUrl.set(branch.url, branch.repository.url);
       }
       for (const pull of detail.pullRequests ?? []) {
-        const repoUrl = pull?.repositoryUrl;
+        const repoUrl = branchToRepoUrl.get(pull.source?.url);
         if (!repoUrl) {
           continue;
         }
@@ -471,7 +468,7 @@ export class Issues extends JiraConverter {
     const issue = record.record.data;
     const source = this.streamName.source;
     const results: DestinationRecord[] = [];
-    const organizationName = this.getOrganizationFromUrl(issue.self);
+    const organizationName = this.getOrganizationFromUrl(issue?.self);
     const organization = {uid: organizationName, source};
 
     if (!this.fieldIdsByName) {
@@ -529,7 +526,7 @@ export class Issues extends JiraConverter {
       results.push({
         model: 'tms_TaskPullRequestAssociation',
         record: {
-          task: {uid: issue.key, organization},
+          task: {uid: issue.key, source, organization},
           pullRequest,
         },
       });
@@ -537,7 +534,7 @@ export class Issues extends JiraConverter {
 
     const created = Utils.toDate(issue.fields.created);
     const assignee =
-      issue.fields.assignee?.emailAddress || issue.fields.assignee?.name;
+      issue.fields.assignee?.accountId || issue.fields.assignee?.name;
     const changelog: any[] = issue.changelog?.histories || [];
     changelog.sort((e1, e2) => {
       // Sort changes from least to most recent
@@ -608,9 +605,13 @@ export class Issues extends JiraConverter {
       });
     }
 
-    const statusChangelog = this.statusChangelog(changelog);
+    const statusChangelog = this.statusChangelog(
+      changelog,
+      issue.fields.status?.name,
+      created
+    );
     // Timestamp of most recent status change
-    let statusChanged: string | undefined;
+    let statusChanged: Date | undefined;
     if (statusChangelog.length) {
       statusChanged = statusChangelog[statusChangelog.length - 1].changedAt;
     }
@@ -667,7 +668,7 @@ export class Issues extends JiraConverter {
     }
 
     const creator =
-      issue.fields.creator?.emailAddress || issue.fields.creator?.accountId;
+      issue.fields.creator?.accountId || issue.fields.creator?.name;
     const parent = issue.fields.parent?.key
       ? {
           key: issue.fields.parent?.key,

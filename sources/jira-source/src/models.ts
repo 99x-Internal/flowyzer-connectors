@@ -13,6 +13,7 @@ export enum RepoSource {
   GIT_FOR_JIRA_CLOUD = 'GitForJiraCloud',
   GITLAB = 'GitLab',
   VCS = 'VCS',
+  AZURE = 'AzureDevOps',
 }
 
 export interface Repo {

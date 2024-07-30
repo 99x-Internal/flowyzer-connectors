@@ -1,4 +1,6 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {Board} from 'faros-airbyte-common/jira';
+import {toString} from 'lodash';
 
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
@@ -14,22 +16,21 @@ export class Boards extends JiraConverter {
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
     if (!this.useBoardOwnership(ctx)) return [];
-
-    const board = record.record.data;
-    const uid = board.id.toString();
+    const board = record.record.data as Board;
+    const uid = toString(board.id);
     const source = this.streamName.source;
     const organizationName = this.getOrganizationFromUrl(board.self);
     const organization = {uid: organizationName, source};
     return [
       {
         model: 'tms_TaskBoard',
-        record: {uid, name: board.name, organization},
+        record: {uid, name: board.name, organization, source},
       },
       {
         model: 'tms_TaskBoardProjectRelationship',
         record: {
           board: {uid, source},
-          project: {uid: board.projectKey, source},
+          project: {uid, source},
         },
       },
     ];

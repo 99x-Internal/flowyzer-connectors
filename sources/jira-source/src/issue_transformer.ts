@@ -162,7 +162,7 @@ export class IssueTransformer {
   private static getSprintFromField(
     sprints: any,
     current?: ReadonlyArray<string>
-  ): string | undefined {
+  ): SprintInfo | undefined {
     // Sort array in descending order of sprint completeDate and return the first
     // one. Future sprints / active may not have end dates but will take precedence.
     const ctx = current
@@ -173,14 +173,14 @@ export class IssueTransformer {
       return state === 'future' || state === 'active';
     });
     if (sprint) {
-      return sprint.id;
+      return sprint;
     }
     ctx.sort((l, r) => {
       const lDate = +(Utils.toDate(l.completeDate) || new Date(0));
       const rDate = +(Utils.toDate(r.completeDate) || new Date(0));
       return rDate - lDate;
     });
-    return toString(ctx[0]?.id);
+    return ctx[0];
   }
 
   private sprintHistory(
@@ -207,8 +207,9 @@ export class IssueTransformer {
     // use the sprint from the sprint field
     if (!sprintChanges.length && sprintAtCreation) {
       return {
-        currentSprintId: sprintAtCreation,
-        history: [{uid: sprintAtCreation, addedAt: created}],
+        currentSprintId: toString(sprintAtCreation.id),
+        history: [{uid: toString(sprintAtCreation.id), addedAt: created}],
+        ...sprintAtCreation,
       };
     }
 
@@ -286,6 +287,7 @@ export class IssueTransformer {
     return {
       currentSprintId: currentSprint?.uid,
       history: IssueTransformer.uniqueSprintHistory(sprintHistory),
+      ...currentSprint,
     };
   }
 
@@ -366,6 +368,32 @@ export class IssueTransformer {
             startDate: sprint.startDate,
             endDate: sprint.endDate,
             completeDate: sprint.completeDate,
+            activatedDate: sprint['activatedDate'],
+            self: sprint.self,
+          });
+        }
+      }
+    }
+    for (const fieldId of this.fieldIdsByName.get('closedSprints') ?? []) {
+      for (const sprint of item.fields[fieldId] ?? []) {
+        // Workaround for string representation of sprint details which are supposedly deprecated
+        // https://developer.atlassian.com/cloud/jira/platform/deprecation-notice-tostring-representation-of-sprints-in-get-issue-response/
+        if (typeof sprint === 'string') {
+          let match;
+          const details = {};
+          while ((match = sprintRegex.exec(sprint)) !== null) {
+            details[match[1]] = match[2];
+          }
+          sprints.push(details);
+        } else if (isPlainObject(sprint)) {
+          sprints.push({
+            id: sprint.id?.toString(),
+            state: sprint.state,
+            startDate: sprint.startDate,
+            endDate: sprint.endDate,
+            completeDate: sprint.completeDate,
+            activatedDate: sprint['activatedDate'],
+            self: sprint.self,
           });
         }
       }
@@ -487,7 +515,7 @@ export class IssueTransformer {
       assignees: assigneeChangelog,
       points: this.getPoints(item) ?? undefined,
       epic: this.getIssueEpic(item),
-      // sprintInfo,
+      sprintInfo,
       additionalFields,
       url: `${this.baseURL.replace(/\/$/, '')}/browse/${item.key}`,
       resolution: item.fields.resolution?.name,

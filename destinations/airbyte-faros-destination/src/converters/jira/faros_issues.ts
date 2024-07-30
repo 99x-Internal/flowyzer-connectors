@@ -1,7 +1,7 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Issue} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
-import {isNil, pick} from 'lodash';
+import {camelCase, isNil, pick, upperFirst} from 'lodash';
 
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraCommon, JiraConverter} from './common';
@@ -39,6 +39,7 @@ export class FarosIssues extends JiraConverter {
     'tms_Task',
     'tms_TaskAssignment',
     'tms_TaskDependency',
+    'tms_TaskProjectRelationship',
     'tms_TaskTag',
   ];
 
@@ -51,9 +52,10 @@ export class FarosIssues extends JiraConverter {
     const issue = record.record.data as Issue;
     const source = this.streamName.source;
     const results: DestinationRecord[] = [];
-    const organizationName = this.getOrganizationFromUrl(issue.url);
-    const organization = {uid: organizationName, source};
     const issueUrl = issue.url;
+    const organizationName = this.getOrganizationFromUrl(issueUrl);
+    const organization = {uid: organizationName, source};
+
     // For next-gen projects, epic should be parent of issue with issue
     // type Epic otherwise use the epic key from custom field in the issue
     const epicKey =
@@ -74,6 +76,19 @@ export class FarosIssues extends JiraConverter {
         changedAt,
       });
     }
+
+    //Complete sprint data
+    const sprintData = {
+      uid: `${organizationName}|${issue.sprintInfo.currentSprintId}`,
+      name: issue.sprintInfo.name,
+      state: upperFirst(camelCase(issue.sprintInfo.state)),
+      startedAt: Utils.toDate(issue.sprintInfo.startDate),
+      openedAt: Utils.toDate(issue.sprintInfo.createdDate),
+      endedAt: Utils.toDate(issue.sprintInfo.endDate),
+      closedAt: Utils.toDate(issue.sprintInfo.completeDate),
+      source,
+      organization,
+    };
 
     const task = {
       uid: issue.key,
@@ -103,18 +118,27 @@ export class FarosIssues extends JiraConverter {
       creator: issue.creator ? {uid: issue.creator, source} : undefined,
       parent: issue.parent ? {uid: issue.parent.key, source} : undefined,
       epic: epicKey ? {uid: epicKey, source} : undefined,
-      sprint: issue.sprintInfo?.currentSprintId
-        ? {uid: issue.sprintInfo.currentSprintId, source}
-        : undefined,
+      sprint: issue.sprintInfo?.currentSprintId ? sprintData : undefined,
       source,
       additionalFields,
       resolutionStatus: issue.resolution,
       resolvedAt: issue.resolutionDate,
       sourceSystemId: issue.id,
       organization,
+      project: {uid: issue.key.split('-')[0], organization},
     };
-
+    ctx.logger.info(
+      'Task received from Faros Destination: ' + JSON.stringify(task)
+    );
     results.push({model: 'tms_Task', record: task});
+
+    results.push({
+      model: 'tms_TaskProjectRelationship',
+      record: {
+        task: {uid: issue.key, source},
+        project: {uid: issue.project, source},
+      },
+    });
 
     if (JiraCommon.normalize(issue.type) === 'epic') {
       results.push({
@@ -187,19 +211,6 @@ export class FarosIssues extends JiraConverter {
         },
       });
     }
-
-    for (const sprint of issue.sprintInfo?.history || []) {
-      results.push({
-        model: 'tms_Sprint',
-        record: {
-          task: {uid: issue.key, source},
-          sprint: {uid: sprint.uid, source},
-          addedAt: sprint.addedAt,
-          removedAt: sprint.removedAt,
-        },
-      });
-    }
-
     this.updateAncestors(issue);
     return results;
   }

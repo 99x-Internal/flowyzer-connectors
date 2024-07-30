@@ -50,7 +50,7 @@ export class Commits extends AzureReposConverter {
         repository,
       },
     });
-    if (commitItem?.branch) {
+    if (commitItem.branch) {
       res.push({
         model: 'vcs_BranchCommitAssociation',
         record: {
@@ -67,6 +67,7 @@ export class Commits extends AzureReposConverter {
         },
       });
     }
+
     return res;
   }
 }
