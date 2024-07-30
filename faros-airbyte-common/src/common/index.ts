@@ -16,3 +16,5 @@ export function bucket(key: string, data: string, bucketTotal: number): number {
   const hex = md5.digest('hex').substring(0, 8);
   return (parseInt(hex, 16) % bucketTotal) + 1; // 1-index for readability
 }
+
+export * from './model';

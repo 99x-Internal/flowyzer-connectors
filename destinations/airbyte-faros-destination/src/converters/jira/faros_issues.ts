@@ -1,4 +1,5 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {TaskStatusChangeLog} from 'faros-airbyte-common/common';
 import {Issue} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import {camelCase, isNil, pick, upperFirst} from 'lodash';
@@ -66,7 +67,7 @@ export class FarosIssues extends JiraConverter {
       additionalFields.push({name, value});
     }
 
-    const statusChangelog: any[] = [];
+    const statusChangelog: TaskStatusChangeLog[] = [];
     for (const [status, changedAt] of issue.statusChangelog) {
       statusChangelog.push({
         status: {

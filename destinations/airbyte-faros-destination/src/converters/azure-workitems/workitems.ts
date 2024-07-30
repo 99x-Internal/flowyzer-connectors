@@ -1,4 +1,4 @@
-import {emailAddress} from 'redact-pii/lib/built-ins/simple-regexp-patterns';
+import {TaskStatusChangeLog} from 'faros-airbyte-common/common';
 
 import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
@@ -19,8 +19,8 @@ export class Workitems extends AzureWorkitemsConverter {
 
   private statusChangelog(
     workItem: CustomWorkItem
-  ): ReadonlyArray<StatusChange> {
-    const statusChangelog: Array<StatusChange> = [];
+  ): ReadonlyArray<TaskStatusChangeLog> {
+    const statusChangelog: Array<TaskStatusChangeLog> = [];
 
     if (workItem && workItem?.fields?.custom) {
       for (const item of workItem.fields.custom) {
@@ -28,14 +28,13 @@ export class Workitems extends AzureWorkitemsConverter {
           item &&
           item.fields &&
           item.fields['System.State'] &&
-          item.fields['System.State'].oldValue &&
           item.fields['System.ChangedDate'] &&
           this.isValidDate(item.fields['System.ChangedDate'].newValue)
         ) {
           statusChangelog.push({
             status: {
-              newValue: item.fields['System.State'].newValue,
-              oldValue: item.fields['System.State'].oldValue,
+              category: item.fields['System.State'].newValue,
+              detail: item.fields['System.State'].newValue,
             },
             changedAt: item.fields['System.ChangedDate'].newValue,
           });
