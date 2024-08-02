@@ -51,6 +51,7 @@ export class FarosIssues extends JiraConverter {
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
     const issue = record.record.data as Issue;
+
     const source = this.streamName.source;
     const results: DestinationRecord[] = [];
     const issueUrl = issue.url;
@@ -80,17 +81,15 @@ export class FarosIssues extends JiraConverter {
 
     //Complete sprint data
     const sprintData = {
-      uid: `${organizationName}|${issue.sprintInfo.currentSprintId}`,
+      uid: `${issue.sprintInfo.currentSprintId}`,
       name: issue.sprintInfo.name,
       state: upperFirst(camelCase(issue.sprintInfo.state)),
       startedAt: Utils.toDate(issue.sprintInfo.startDate),
       openedAt: Utils.toDate(issue.sprintInfo.createdDate),
       endedAt: Utils.toDate(issue.sprintInfo.endDate),
       closedAt: Utils.toDate(issue.sprintInfo.completeDate),
-      source,
       organization,
     };
-
     const task = {
       uid: issue.key,
       name: issue.summary,
@@ -116,10 +115,10 @@ export class FarosIssues extends JiraConverter {
       statusChangedAt: issue.statusChanged,
       statusChangelog,
       points: issue.points ?? undefined,
-      creator: issue.creator ? {uid: issue.creator, source} : undefined,
-      parent: issue.parent ? {uid: issue.parent.key, source} : undefined,
+      creator: issue.creator ? {uid: issue.creator, organization} : undefined,
+      parent: issue.parent ? {uid: issue.parent.key, organization} : undefined,
       epic: epicKey ? {uid: epicKey, source} : undefined,
-      sprint: issue.sprintInfo?.currentSprintId ? sprintData : undefined,
+      sprint: issue.sprintInfo.currentSprintId ? sprintData : null,
       source,
       additionalFields,
       resolutionStatus: issue.resolution,
@@ -129,15 +128,15 @@ export class FarosIssues extends JiraConverter {
       project: {uid: issue.key.split('-')[0], organization},
     };
     ctx.logger.info(
-      'Task received from Faros Destination: ' + JSON.stringify(task)
+      'Task - Issue Key received from Faros Destination: ' + issue.key
     );
     results.push({model: 'tms_Task', record: task});
 
     results.push({
       model: 'tms_TaskProjectRelationship',
       record: {
-        task: {uid: issue.key, source},
-        project: {uid: issue.project, source},
+        task: {uid: issue.key, organization},
+        project: {uid: issue.project, organization},
       },
     });
 
@@ -154,7 +153,7 @@ export class FarosIssues extends JiraConverter {
             'status',
             'source',
           ]),
-          project: {uid: issue.project, source: this.source},
+          project: {uid: issue.project, organization},
         },
       });
     }
@@ -168,8 +167,8 @@ export class FarosIssues extends JiraConverter {
           results.push({
             model: 'tms_TaskAssignment',
             record: {
-              task: {uid: issue.key, source},
-              assignee: {uid: assignee.uid, source},
+              task: {uid: issue.key, organization},
+              assignee: {uid: assignee.uid, organization},
               assignedAt: assignee.assignedAt,
             },
           });
@@ -177,41 +176,41 @@ export class FarosIssues extends JiraConverter {
       }
     }
 
-    for (const dependency of issue.dependencies) {
-      const fulfillingType = fulfillingTypeCategories.get(
-        JiraCommon.normalize(dependency.outward)
-      );
-      results.push({
-        model: 'tms_TaskDependency',
-        record: {
-          dependentTask: {uid: issue.key, source},
-          fulfillingTask: {uid: dependency.key, source},
-          blocking: fulfillingType === 'Blocks',
-          dependencyType: {
-            category: this.toDependentType(dependency.inward) ?? 'Custom',
-            detail: dependency.inward,
-          },
-          fulfillingType: {
-            category: fulfillingType ?? 'Custom',
-            detail: dependency.outward,
-          },
-        },
-      });
-    }
+    // for (const dependency of issue.dependencies) {
+    //   const fulfillingType = fulfillingTypeCategories.get(
+    //     JiraCommon.normalize(dependency.outward)
+    //   );
+    //   results.push({
+    //     model: 'tms_TaskDependency',
+    //     record: {
+    //       dependentTask: {uid: issue.key, source},
+    //       fulfillingTask: {uid: dependency.key, source},
+    //       blocking: fulfillingType === 'Blocks',
+    //       dependencyType: {
+    //         category: this.toDependentType(dependency.inward) ?? 'Custom',
+    //         detail: dependency.inward,
+    //       },
+    //       fulfillingType: {
+    //         category: fulfillingType ?? 'Custom',
+    //         detail: dependency.outward,
+    //       },
+    //     },
+    //   });
+    // }
 
-    for (const label of issue.labels) {
-      if (!this.labels.has(label)) {
-        results.push({model: 'tms_Label', record: {name: label}});
-        this.labels.add(label);
-      }
-      results.push({
-        model: 'tms_TaskTag',
-        record: {
-          label: {name: label},
-          task: {uid: issue.key, source},
-        },
-      });
-    }
+    // for (const label of issue.labels) {
+    //   if (!this.labels.has(label)) {
+    //     results.push({model: 'tms_Label', record: {name: label}});
+    //     this.labels.add(label);
+    //   }
+    //   results.push({
+    //     model: 'tms_TaskTag',
+    //     record: {
+    //       label: {name: label},
+    //       task: {uid: issue.key, organization},
+    //     },
+    //   });
+    // }
     this.updateAncestors(issue);
     return results;
   }
@@ -261,7 +260,7 @@ export class FarosIssues extends JiraConverter {
       results.push({
         model: 'tms_Task__Update',
         record: {
-          where: {uid: ancestorKey, source: this.source},
+          where: {uid: ancestorKey, organization: issue.organization},
           mask: ['status', 'statusChangelog', 'statusChangedAt', 'updatedAt'],
           patch: {
             status: updatedStatus,

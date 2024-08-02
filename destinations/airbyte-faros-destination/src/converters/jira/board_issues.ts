@@ -15,12 +15,14 @@ export class BoardIssues extends JiraConverter {
     if (!this.useBoardOwnership(ctx)) return [];
     const issue = record.record.data;
     const source = this.streamName.source;
+    const organizationName = this.getOrganizationFromUrl(issue.url);
+    const organization = {uid: organizationName, source};
     return [
       {
         model: 'tms_TaskBoardRelationship',
         record: {
-          task: {uid: issue.key, source},
-          board: {uid: String(issue.boardId), source},
+          task: {uid: issue.key, organization},
+          board: {uid: String(issue.boardId), organization},
         },
       },
     ];

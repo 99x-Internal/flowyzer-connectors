@@ -36,14 +36,13 @@ export class FarosBoards extends JiraConverter {
           type: board.type,
           organization,
           source,
-          project: {uid: projectKey, organization},
         },
       },
       {
         model: 'tms_TaskBoardProjectRelationship',
         record: {
-          board: {uid, source},
-          project: {uid: toString(board.projectKey), source},
+          board: {uid, organization},
+          project: {uid: projectKey, organization},
         },
       },
     ];
