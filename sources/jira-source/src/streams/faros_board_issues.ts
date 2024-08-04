@@ -12,7 +12,7 @@ export class FarosBoardIssues extends StreamWithBoardSlices {
   }
 
   get primaryKey(): StreamKey | undefined {
-    return ['key', 'boardId'];
+    return ['key', 'url', 'boardId'];
   }
 
   async *readRecords(
@@ -25,9 +25,10 @@ export class FarosBoardIssues extends StreamWithBoardSlices {
     const boardConfig = await jira.getBoardConfiguration(boardId);
     const boardJql = await jira.getBoardJQL(boardConfig.filter.id);
     try {
-      for await (const issue of jira.getIssuesKeys(boardJql)) {
+      for await (const issue of jira.getIssuesCompact(boardJql)) {
         yield {
-          key: issue,
+          key: issue.key,
+          url: issue.url,
           boardId,
         };
       }

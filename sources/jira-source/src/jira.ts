@@ -754,6 +754,7 @@ export class Jira {
     const issue: IssueCompact = {
       id: item.id,
       key: item.key,
+      url: `${this.baseURL.replace(/\/$/, '')}/browse/${item.key}`,
       created: Utils.toDate(item.fields.created),
       updated: Utils.toDate(item.fields.updated),
       fields: item.fields,
@@ -786,6 +787,7 @@ export class Jira {
       async (item: any) => ({
         id: item.id,
         key: item.key,
+        url: `${this.baseURL.replace(/\/$/, '')}/browse/${item.key}`,
         created: Utils.toDate(item.fields.created),
         updated: Utils.toDate(item.fields.updated),
         fields: item.fields,

@@ -8,6 +8,7 @@ export interface IssueCompact {
   readonly created?: Date;
   readonly updated?: Date;
   readonly boardId?: string;
+  readonly url?: string;
 }
 
 export interface Issue extends IssueCompact {
@@ -34,6 +35,7 @@ export interface Issue extends IssueCompact {
   readonly url: string;
   readonly resolution: string;
   readonly resolutionDate: Date;
+  readonly organization?: string;
 }
 
 export interface Parent {
