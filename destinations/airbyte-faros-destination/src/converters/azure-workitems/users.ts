@@ -14,17 +14,19 @@ export class Users extends AzureWorkitemsConverter {
     const organizationName = this.getOrganizationFromUrl(userItem.url);
     const organization = {uid: organizationName, source};
     const res: DestinationRecord[] = [];
+    if (userItem.principalName && userItem.mailAddress) {
+      res.push({
+        model: 'tms_User',
+        record: {
+          uid: userItem.principalName,
+          name: userItem.displayName,
+          emailAddress: userItem.mailAddress,
+          source,
+          organization,
+        },
+      });
+    }
 
-    res.push({
-      model: 'tms_User',
-      record: {
-        uid: userItem.principalName,
-        name: userItem.displayName,
-        emailAddress: userItem.mailAddress,
-        source,
-        organization,
-      },
-    });
     return res;
   }
 }

@@ -31,25 +31,27 @@ export class Users extends AzureReposConverter {
       category: UserTypeCategory.User,
       detail: userItem.subjectKind,
     };
-    res.push({
-      model: 'vcs_Membership',
-      record: {
-        organization,
-        user: {uid: userItem.principalName, source},
-      },
-    });
-    res.push({
-      model: 'vcs_User',
-      record: {
-        uid: userItem.principalName,
-        name: userItem.displayName,
-        type,
-        htmlUrl: userItem.url,
-        url: userItem.url,
-        email: userItem.mailAddress,
-        source,
-      },
-    });
+    if (userItem.principalName && userItem.mailAddress) {
+      res.push({
+        model: 'vcs_Membership',
+        record: {
+          organization,
+          user: {uid: userItem.principalName, source},
+        },
+      });
+      res.push({
+        model: 'vcs_User',
+        record: {
+          uid: userItem.principalName,
+          name: userItem.displayName,
+          type,
+          htmlUrl: userItem.url,
+          url: userItem.url,
+          email: userItem.mailAddress,
+          source,
+        },
+      });
+    }
     return res;
   }
 }
