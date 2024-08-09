@@ -40,20 +40,20 @@ export class PullRequests extends AzureReposConverter {
 
     for (const thread of pullRequestItem.threads ?? []) {
       for (const comment of thread.comments) {
-        if (comment.author.uniqueName) {
-          res.push({
-            model: 'vcs_PullRequestComment',
-            record: {
-              number: comment.id,
-              uid: thread.id + '/' + comment.id.toString(),
-              comment: comment.content?.substring(0, MAX_DESCRIPTION_LENGTH),
-              createdAt: Utils.toDate(comment.publishedDate),
-              updatedAt: Utils.toDate(comment.lastUpdatedDate),
-              author: {uid: comment.author.uniqueName, source},
-              pullRequest,
-            },
-          });
-        }
+        // if (comment.author.uniqueName) {
+        res.push({
+          model: 'vcs_PullRequestComment',
+          record: {
+            number: comment.id,
+            uid: thread.id + '/' + comment.id.toString(),
+            comment: comment.content?.substring(0, MAX_DESCRIPTION_LENGTH),
+            createdAt: Utils.toDate(comment.publishedDate),
+            updatedAt: Utils.toDate(comment.lastUpdatedDate),
+            author: {uid: comment.author.uniqueName, organization},
+            pullRequest,
+          },
+        });
+        // }
       }
     }
 
