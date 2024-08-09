@@ -35,7 +35,7 @@ export class Users extends AzureReposConverter {
       model: 'vcs_Membership',
       record: {
         organization,
-        user: {uid: userItem.principalName, source},
+        user: {uid: userItem.principalName, organization},
       },
     });
     res.push({
@@ -48,6 +48,7 @@ export class Users extends AzureReposConverter {
         url: userItem.url,
         email: userItem.mailAddress,
         source,
+        organization,
       },
     });
     return res;
