@@ -1,5 +1,9 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {TaskStatusChangeLog} from 'faros-airbyte-common/common';
+import {
+  FlowzyerTask,
+  TaskAdditionalField,
+  TaskStatusChangeLog,
+} from 'faros-airbyte-common/common';
 import {Issue} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import {camelCase, isNil, pick, upperFirst} from 'lodash';
@@ -63,7 +67,7 @@ export class FarosIssues extends JiraConverter {
     const epicKey =
       issue.parent?.type === 'Epic' ? issue.parent.key : issue.epic;
 
-    const additionalFields: any[] = [];
+    const additionalFields: TaskAdditionalField[] = [];
     for (const [name, value] of issue.additionalFields) {
       additionalFields.push({name, value});
     }
@@ -90,7 +94,7 @@ export class FarosIssues extends JiraConverter {
       closedAt: Utils.toDate(issue.sprintInfo.completeDate),
       organization,
     };
-    const task = {
+    const flowzyerTaskRecord: FlowzyerTask = {
       uid: issue.key,
       name: issue.summary,
       description: Utils.cleanAndTruncate(
@@ -130,7 +134,7 @@ export class FarosIssues extends JiraConverter {
     ctx.logger.info(
       'Task - Issue Key received from Faros Destination: ' + issue.key
     );
-    results.push({model: 'tms_Task', record: task});
+    results.push({model: 'tms_Task', record: flowzyerTaskRecord});
 
     results.push({
       model: 'tms_TaskProjectRelationship',
@@ -144,7 +148,7 @@ export class FarosIssues extends JiraConverter {
       results.push({
         model: 'tms_Epic',
         record: {
-          ...pick(task, [
+          ...pick(flowzyerTaskRecord, [
             'uid',
             'name',
             'createdAt',

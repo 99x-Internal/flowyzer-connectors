@@ -1,4 +1,5 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {SprintState} from 'faros-airbyte-common/common';
 import {Sprint} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import {camelCase, upperFirst} from 'lodash';
@@ -20,13 +21,17 @@ export class FarosSprints extends JiraConverter {
     const organizationName = this.getOrganizationFromUrl(sprint?.self);
     const organization = {uid: organizationName, source};
     ctx.logger.info(`Sprint data found: ${JSON.stringify(sprint)}`);
+    const sprintState: SprintState = {
+      category: upperFirst(camelCase(sprint.state)),
+      detail: '',
+    };
     return [
       {
         model: 'tms_Sprint',
         record: {
           uid: `${sprint.id}`,
           name: sprint.name,
-          state: upperFirst(camelCase(sprint.state)),
+          state: sprintState,
           startedAt: Utils.toDate(sprint.startDate),
           openedAt: Utils.toDate(sprint.activatedDate),
           endedAt: Utils.toDate(sprint.endDate),
