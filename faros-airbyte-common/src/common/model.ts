@@ -50,3 +50,19 @@ export class SprintState {
   category: string;
   detail: string;
 }
+
+export class PullRequestState {
+  category: string;
+  detail: string;
+}
+
+export class PullRequestDiffStats {
+  linesAdded: number;
+  linesDeleted: number;
+  filesChanged: number;
+}
+
+export class PullRequestReviewState {
+  category: string;
+  detail: string;
+}

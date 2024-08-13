@@ -1,3 +1,7 @@
+import {
+  PullRequestReviewState,
+  PullRequestState,
+} from 'faros-airbyte-common/common';
 import {Utils} from 'faros-js-client';
 
 import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
@@ -89,13 +93,16 @@ export class PullRequests extends AzureReposConverter {
         }
       : null;
 
+    const vcsPullRequestState: PullRequestState = this.convertPullRequestState(
+      pullRequestItem.status
+    );
     res.push({
       model: 'vcs_PullRequest',
       record: {
         number: pullRequestItem.pullRequestId,
         uid: pullRequestItem.pullRequestId.toString(),
         title: pullRequestItem.title,
-        state: this.convertPullRequestState(pullRequestItem.status),
+        state: vcsPullRequestState,
         htmlUrl: pullRequestItem.url,
         url: pullRequestItem.url,
         createdAt: Utils.toDate(pullRequestItem.creationDate),
@@ -109,13 +116,15 @@ export class PullRequests extends AzureReposConverter {
     });
 
     for (const reviewer of pullRequestItem.reviewers ?? []) {
+      const vcsPullRequestReviewState: PullRequestReviewState =
+        this.convertPullRequestReviewState(reviewer.vote);
       res.push({
         model: 'vcs_PullRequestReview',
         record: {
           number: this.convertStringToNumber(reviewer.id),
           uid: reviewer.id,
           htmlUrl: reviewer.url,
-          state: this.convertPullRequestReviewState(reviewer.vote),
+          state: vcsPullRequestReviewState,
           submittedAt: null,
           reviewer: {uid: reviewer.uniqueName, source},
           pullRequest,
