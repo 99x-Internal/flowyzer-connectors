@@ -16,11 +16,11 @@ RUN lerna bootstrap --hoist
 
 ARG version
 RUN test -n "$version" || (echo "'version' argument is not set, e.g --build-arg version=x.y.z" && false)
-ENV CONNECTOR_VERSION $version
+ENV CONNECTOR_VERSION=$version
 
 RUN apk del .gyp
 
 RUN ln -s "/home/node/airbyte/destinations/airbyte-faros-destination/bin/main" "/home/node/airbyte/main"
 
-ENV AIRBYTE_ENTRYPOINT "/home/node/airbyte/main"
+ENV AIRBYTE_ENTRYPOINT="/home/node/airbyte/main"
 ENTRYPOINT ["/home/node/airbyte/main"]

@@ -31,11 +31,12 @@ export class Users extends AzureReposConverter {
       category: UserTypeCategory.User,
       detail: userItem.subjectKind,
     };
+    //if (userItem.principalName && userItem.mailAddress) {
     res.push({
       model: 'vcs_Membership',
       record: {
         organization,
-        user: {uid: userItem.principalName, source},
+        user: {uid: userItem.principalName, organization},
       },
     });
     res.push({
@@ -47,9 +48,11 @@ export class Users extends AzureReposConverter {
         htmlUrl: userItem.url,
         url: userItem.url,
         email: userItem.mailAddress,
+        organization,
         source,
       },
     });
+    // }
     return res;
   }
 }
