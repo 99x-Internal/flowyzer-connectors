@@ -1,4 +1,5 @@
 import {SprintState} from 'faros-airbyte-common/common';
+import {camelCase, upperFirst} from 'lodash';
 
 import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
@@ -20,8 +21,8 @@ export class Iterations extends AzureWorkitemsConverter {
       'Sprint State found: ' + JSON.stringify(Iteration.attributes.timeFrame)
     );
     const sprintState: SprintState = {
-      category: Iteration.attributes.timeFrame,
-      detail: '',
+      category: upperFirst(camelCase(Iteration.attributes.timeFrame)),
+      detail: '', // To added in the future, handled by Flowzyer common setter
     };
     return [
       {
