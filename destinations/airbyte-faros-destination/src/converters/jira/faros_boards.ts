@@ -1,9 +1,10 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {Board} from 'faros-airbyte-common/jira';
+import {toString} from 'lodash';
 
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
-
-export class Boards extends JiraConverter {
+export class FarosBoards extends JiraConverter {
   readonly destinationModels: ReadonlyArray<DestinationModel> = [
     'tms_TaskBoard',
     'tms_TaskBoardProjectRelationship',
@@ -13,23 +14,35 @@ export class Boards extends JiraConverter {
     record: AirbyteRecord,
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
-    if (!this.useBoardOwnership(ctx)) return [];
-
-    const board = record.record.data;
-    const uid = board.id.toString();
+    const board = record.record.data as Board;
+    ctx.logger.info(
+      'Board data received from destination: ' + JSON.stringify(board)
+    );
+    const uid = toString(board.id);
+    if (!uid) return;
     const source = this.streamName.source;
     const organizationName = this.getOrganizationFromUrl(board.self);
     const organization = {uid: organizationName, source};
+    ctx.logger.info(
+      'Board data received from Destination:' + JSON.stringify(board)
+    );
+    const projectKey = board?.location?.projectKey;
     return [
       {
         model: 'tms_TaskBoard',
-        record: {uid, name: board.name, organization},
+        record: {
+          uid,
+          name: board.name,
+          type: board.type,
+          organization,
+          source,
+        },
       },
       {
         model: 'tms_TaskBoardProjectRelationship',
         record: {
-          board: {uid, source},
-          project: {uid: board.projectKey, source},
+          board: {uid, organization},
+          project: {uid: projectKey, organization},
         },
       },
     ];

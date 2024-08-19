@@ -7,6 +7,9 @@
     },
     "boardId": {
       "type": "string"
+    },
+    "url":{
+      "type":"string"
     }
   }
 }

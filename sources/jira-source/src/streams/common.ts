@@ -1,14 +1,10 @@
 import {AirbyteLogger, AirbyteStreamBase} from 'faros-airbyte-cdk';
 import {FarosClient, Utils} from 'faros-js-client';
+import {isNil} from 'lodash';
 import moment from 'moment';
 
-import {
-  DEFAULT_CUTOFF_DAYS,
-  DEFAULT_CUTOFF_LAG_DAYS,
-  DEFAULT_GRAPH,
-  Jira,
-  JiraConfig,
-} from '../jira';
+import {DEFAULT_CUTOFF_LAG_DAYS, JiraConfig} from '../jira';
+import {ProjectBoardFilter} from '../project-board-filter';
 
 export type ProjectStreamSlice = {
   project: string;
@@ -31,29 +27,28 @@ export const WebhookSupplementStreamNames = [
   'faros_board_issues',
   'faros_sprint_reports',
   'faros_issue_pull_requests',
-  'faros_issues',
-  'faros_users',
 ];
 
 export abstract class StreamBase extends AirbyteStreamBase {
+  readonly projectBoardFilter: ProjectBoardFilter;
   constructor(
     protected readonly config: JiraConfig,
     protected readonly logger: AirbyteLogger,
     protected readonly farosClient?: FarosClient
   ) {
     super(logger);
+    this.projectBoardFilter = new ProjectBoardFilter(
+      config,
+      logger,
+      farosClient
+    );
   }
 
   protected getUpdateRange(cutoff?: number): [Date, Date] {
-    const newCutoff = moment().utc().toDate();
-    // If no state with cutoff, use the default one applying cutoffDays
-    const fromCutoff = cutoff
-      ? Utils.toDate(cutoff)
-      : moment()
-          .utc()
-          .subtract(this.config.cutoff_days || DEFAULT_CUTOFF_DAYS, 'days')
-          .toDate();
-    return [fromCutoff, newCutoff];
+    return [
+      cutoff ? Utils.toDate(cutoff) : this.config.start_date,
+      this.config.end_date,
+    ];
   }
 
   protected getUpdatedStreamState(
@@ -61,22 +56,35 @@ export abstract class StreamBase extends AirbyteStreamBase {
     currentStreamState: StreamState,
     projectOrBoardKey: string
   ): StreamState {
+    return StreamBase.calculateUpdatedStreamState(
+      latestRecordCutoff,
+      currentStreamState,
+      projectOrBoardKey,
+      this.config.cutoff_lag_days ?? DEFAULT_CUTOFF_LAG_DAYS
+    );
+  }
+
+  static calculateUpdatedStreamState(
+    latestRecordCutoff: Date,
+    currentStreamState: StreamState,
+    projectOrBoardKey: string,
+    cutoffLagDays: number
+  ): StreamState {
+    if (isNil(latestRecordCutoff)) {
+      return currentStreamState;
+    }
+
     const currentCutoff = Utils.toDate(
       currentStreamState?.[projectOrBoardKey]?.cutoff ?? 0
     );
-    if (latestRecordCutoff > currentCutoff) {
-      const newCutoff = moment().utc().toDate();
-      const cutoffLag = moment
-        .duration(
-          this.config.cutoff_lag_days || DEFAULT_CUTOFF_LAG_DAYS,
-          'days'
-        )
-        .asMilliseconds();
+
+    const adjustedLatestRecordCutoff = moment(latestRecordCutoff)
+      .subtract(cutoffLagDays, 'days')
+      .toDate();
+
+    if (adjustedLatestRecordCutoff > currentCutoff) {
       const newState = {
-        cutoff: Math.max(
-          latestRecordCutoff.getTime(),
-          newCutoff.getTime() - cutoffLag
-        ),
+        cutoff: adjustedLatestRecordCutoff.getTime(),
       };
       return {
         ...currentStreamState,
@@ -95,42 +103,16 @@ export abstract class StreamBase extends AirbyteStreamBase {
 
 export abstract class StreamWithProjectSlices extends StreamBase {
   async *streamSlices(): AsyncGenerator<ProjectStreamSlice> {
-    const jira = await Jira.instance(this.config, this.logger);
-    if (!this.config.projects) {
-      const projects = this.supportsFarosClient()
-        ? jira.getProjectsFromGraph(
-            this.farosClient,
-            this.config.graph ?? DEFAULT_GRAPH
-          )
-        : jira.getProjects();
-      for await (const project of projects) {
-        yield {project: project.key};
-      }
-    } else {
-      for (const project of this.config.projects) {
-        if (jira.isProjectInBucket(project)) yield {project};
-      }
+    for (const project of await this.projectBoardFilter.getProjects()) {
+      yield {project};
     }
   }
 }
 
 export abstract class StreamWithBoardSlices extends StreamBase {
   async *streamSlices(): AsyncGenerator<BoardStreamSlice> {
-    const jira = await Jira.instance(this.config, this.logger);
-    if (!this.config.boards) {
-      const boards = this.supportsFarosClient()
-        ? jira.getBoardsFromGraph(
-            this.farosClient,
-            this.config.graph ?? DEFAULT_GRAPH
-          )
-        : jira.getBoards();
-      for await (const board of boards) {
-        yield {board: board.id.toString()};
-      }
-    } else {
-      for (const board of this.config.boards) {
-        if (await jira.isBoardInBucket(board)) yield {board};
-      }
+    for (const board of await this.projectBoardFilter.getBoards()) {
+      yield {board};
     }
   }
 }

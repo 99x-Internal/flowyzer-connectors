@@ -6,6 +6,7 @@ import {JiraConverter} from './common';
 export class Projects extends JiraConverter {
   readonly destinationModels: ReadonlyArray<DestinationModel> = [
     'tms_Project',
+    'tms_TaskBoard',
     'tms_TaskBoardProjectRelationship',
   ];
 
@@ -25,14 +26,21 @@ export class Projects extends JiraConverter {
         uid,
         name: project.name,
         description: this.truncate(ctx, project.description),
+        source,
         organization,
       },
     });
     if (!this.useBoardOwnership(ctx)) {
-      results.push({
-        model: 'tms_TaskBoardProjectRelationship',
-        record: {board: {uid, source}, project: {uid, source}},
-      });
+      results.push(
+        {
+          model: 'tms_TaskBoard',
+          record: {uid, name: project.name, source},
+        },
+        {
+          model: 'tms_TaskBoardProjectRelationship',
+          record: {board: {uid, source}, project: {uid, source}},
+        }
+      );
     }
     return results;
   }

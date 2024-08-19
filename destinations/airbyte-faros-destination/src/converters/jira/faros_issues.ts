@@ -1,7 +1,12 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {
+  FlowzyerTask,
+  TaskAdditionalField,
+  TaskStatusChangeLog,
+} from 'faros-airbyte-common/common';
 import {Issue} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
-import {isNil, pick} from 'lodash';
+import {camelCase, isNil, pick, upperFirst} from 'lodash';
 
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraCommon, JiraConverter} from './common';
@@ -39,6 +44,7 @@ export class FarosIssues extends JiraConverter {
     'tms_Task',
     'tms_TaskAssignment',
     'tms_TaskDependency',
+    'tms_TaskProjectRelationship',
     'tms_TaskTag',
   ];
 
@@ -49,22 +55,24 @@ export class FarosIssues extends JiraConverter {
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
     const issue = record.record.data as Issue;
+
     const source = this.streamName.source;
     const results: DestinationRecord[] = [];
-    const organizationName = this.getOrganizationFromUrl(issue.url);
-    const organization = {uid: organizationName, source};
     const issueUrl = issue.url;
+    const organizationName = this.getOrganizationFromUrl(issueUrl);
+    const organization = {uid: organizationName, source};
+
     // For next-gen projects, epic should be parent of issue with issue
     // type Epic otherwise use the epic key from custom field in the issue
     const epicKey =
       issue.parent?.type === 'Epic' ? issue.parent.key : issue.epic;
 
-    const additionalFields: any[] = [];
+    const additionalFields: TaskAdditionalField[] = [];
     for (const [name, value] of issue.additionalFields) {
       additionalFields.push({name, value});
     }
 
-    const statusChangelog: any[] = [];
+    const statusChangelog: TaskStatusChangeLog[] = [];
     for (const [status, changedAt] of issue.statusChangelog) {
       statusChangelog.push({
         status: {
@@ -75,7 +83,18 @@ export class FarosIssues extends JiraConverter {
       });
     }
 
-    const task = {
+    //Complete sprint data
+    const sprintData = {
+      uid: `${issue.sprintInfo.currentSprintId}`,
+      name: issue.sprintInfo.name,
+      state: upperFirst(camelCase(issue.sprintInfo.state)),
+      startedAt: Utils.toDate(issue.sprintInfo.startDate),
+      openedAt: Utils.toDate(issue.sprintInfo.createdDate),
+      endedAt: Utils.toDate(issue.sprintInfo.endDate),
+      closedAt: Utils.toDate(issue.sprintInfo.completeDate),
+      organization,
+    };
+    const flowzyerTaskRecord: FlowzyerTask = {
       uid: issue.key,
       name: issue.summary,
       description: Utils.cleanAndTruncate(
@@ -100,27 +119,36 @@ export class FarosIssues extends JiraConverter {
       statusChangedAt: issue.statusChanged,
       statusChangelog,
       points: issue.points ?? undefined,
-      creator: issue.creator ? {uid: issue.creator, source} : undefined,
-      parent: issue.parent ? {uid: issue.parent.key, source} : undefined,
+      creator: issue.creator ? {uid: issue.creator, organization} : undefined,
+      parent: issue.parent ? {uid: issue.parent.key, organization} : undefined,
       epic: epicKey ? {uid: epicKey, source} : undefined,
-      sprint: issue.sprintInfo?.currentSprintId
-        ? {uid: issue.sprintInfo.currentSprintId, source}
-        : undefined,
+      sprint: issue.sprintInfo.currentSprintId ? sprintData : null,
       source,
       additionalFields,
       resolutionStatus: issue.resolution,
       resolvedAt: issue.resolutionDate,
       sourceSystemId: issue.id,
       organization,
+      project: {uid: issue.key.split('-')[0], organization},
     };
+    ctx.logger.info(
+      'Task - Issue Key received from Faros Destination: ' + issue.key
+    );
+    results.push({model: 'tms_Task', record: flowzyerTaskRecord});
 
-    results.push({model: 'tms_Task', record: task});
+    results.push({
+      model: 'tms_TaskProjectRelationship',
+      record: {
+        task: {uid: issue.key, organization},
+        project: {uid: issue.project, organization},
+      },
+    });
 
     if (JiraCommon.normalize(issue.type) === 'epic') {
       results.push({
         model: 'tms_Epic',
         record: {
-          ...pick(task, [
+          ...pick(flowzyerTaskRecord, [
             'uid',
             'name',
             'createdAt',
@@ -129,7 +157,7 @@ export class FarosIssues extends JiraConverter {
             'status',
             'source',
           ]),
-          project: {uid: issue.project, source: this.source},
+          project: {uid: issue.project, organization},
         },
       });
     }
@@ -143,8 +171,8 @@ export class FarosIssues extends JiraConverter {
           results.push({
             model: 'tms_TaskAssignment',
             record: {
-              task: {uid: issue.key, source},
-              assignee: {uid: assignee.uid, source},
+              task: {uid: issue.key, organization},
+              assignee: {uid: assignee.uid, organization},
               assignedAt: assignee.assignedAt,
             },
           });
@@ -152,54 +180,41 @@ export class FarosIssues extends JiraConverter {
       }
     }
 
-    for (const dependency of issue.dependencies) {
-      const fulfillingType = fulfillingTypeCategories.get(
-        JiraCommon.normalize(dependency.outward)
-      );
-      results.push({
-        model: 'tms_TaskDependency',
-        record: {
-          dependentTask: {uid: issue.key, source},
-          fulfillingTask: {uid: dependency.key, source},
-          blocking: fulfillingType === 'Blocks',
-          dependencyType: {
-            category: this.toDependentType(dependency.inward) ?? 'Custom',
-            detail: dependency.inward,
-          },
-          fulfillingType: {
-            category: fulfillingType ?? 'Custom',
-            detail: dependency.outward,
-          },
-        },
-      });
-    }
+    // for (const dependency of issue.dependencies) {
+    //   const fulfillingType = fulfillingTypeCategories.get(
+    //     JiraCommon.normalize(dependency.outward)
+    //   );
+    //   results.push({
+    //     model: 'tms_TaskDependency',
+    //     record: {
+    //       dependentTask: {uid: issue.key, source},
+    //       fulfillingTask: {uid: dependency.key, source},
+    //       blocking: fulfillingType === 'Blocks',
+    //       dependencyType: {
+    //         category: this.toDependentType(dependency.inward) ?? 'Custom',
+    //         detail: dependency.inward,
+    //       },
+    //       fulfillingType: {
+    //         category: fulfillingType ?? 'Custom',
+    //         detail: dependency.outward,
+    //       },
+    //     },
+    //   });
+    // }
 
-    for (const label of issue.labels) {
-      if (!this.labels.has(label)) {
-        results.push({model: 'tms_Label', record: {name: label}});
-        this.labels.add(label);
-      }
-      results.push({
-        model: 'tms_TaskTag',
-        record: {
-          label: {name: label},
-          task: {uid: issue.key, source},
-        },
-      });
-    }
-
-    for (const sprint of issue.sprintInfo?.history || []) {
-      results.push({
-        model: 'tms_Sprint',
-        record: {
-          task: {uid: issue.key, source},
-          sprint: {uid: sprint.uid, source},
-          addedAt: sprint.addedAt,
-          removedAt: sprint.removedAt,
-        },
-      });
-    }
-
+    // for (const label of issue.labels) {
+    //   if (!this.labels.has(label)) {
+    //     results.push({model: 'tms_Label', record: {name: label}});
+    //     this.labels.add(label);
+    //   }
+    //   results.push({
+    //     model: 'tms_TaskTag',
+    //     record: {
+    //       label: {name: label},
+    //       task: {uid: issue.key, organization},
+    //     },
+    //   });
+    // }
     this.updateAncestors(issue);
     return results;
   }
@@ -249,7 +264,7 @@ export class FarosIssues extends JiraConverter {
       results.push({
         model: 'tms_Task__Update',
         record: {
-          where: {uid: ancestorKey, source: this.source},
+          where: {uid: ancestorKey, organization: issue.organization},
           mask: ['status', 'statusChangelog', 'statusChangedAt', 'updatedAt'],
           patch: {
             status: updatedStatus,

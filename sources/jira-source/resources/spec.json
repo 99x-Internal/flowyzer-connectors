@@ -42,7 +42,7 @@
       "sync_additional_fields": {
         "order": 5,
         "type": "boolean",
-        "title": "Sync Additional Fields (Enable this option)",
+        "title": "Sync Additional Fields",
         "description": "Include additional fields on tasks.",
         "default": true
       },
@@ -188,6 +188,12 @@
         "title": "Graph name",
         "description": "The Faros graph name.",
         "default": "default"
+      },
+      "use_sprints_reverse_search": {
+        "order": 24,
+        "type": "boolean",
+        "title": "Fetch closed sprints starting with most recent in backlog. Use this for Jira instances with a lots closed sprints and syncing sprints is slow.",
+        "default": false
       }
     }
   }

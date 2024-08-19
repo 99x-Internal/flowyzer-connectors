@@ -14,8 +14,12 @@ import VError from 'verror';
 import {DEFAULT_API_URL, Jira, JiraConfig} from './jira';
 import {RunMode, WebhookSupplementStreamNames} from './streams/common';
 import {FarosBoardIssues} from './streams/faros_board_issues';
+import {FarosBoards} from './streams/faros_boards';
 import {FarosIssuePullRequests} from './streams/faros_issue_pull_requests';
 import {FarosIssues} from './streams/faros_issues';
+import {FarosProjectVersionIssues} from './streams/faros_project_version_issues';
+import {FarosProjectVersions} from './streams/faros_project_versions';
+import {FarosProjects} from './streams/faros_projects';
 import {FarosSprintReports} from './streams/faros_sprint_reports';
 import {FarosSprints} from './streams/faros_sprints';
 import {FarosUsers} from './streams/faros_users';
@@ -60,11 +64,15 @@ export class JiraSource extends AirbyteSourceBase<JiraConfig> {
     }
     return [
       new FarosIssuePullRequests(config, this.logger, farosClient),
-      new FarosSprintReports(config, this.logger, farosClient),
+      // new FarosSprintReports(config, this.logger, farosClient),
       new FarosBoardIssues(config, this.logger, farosClient),
-      new FarosSprints(config, this.logger, farosClient),
-      new FarosUsers(config, this.logger, farosClient),
-      new FarosIssues(config, this.logger, farosClient),
+      new FarosSprints(config, this.logger),
+      new FarosUsers(config, this.logger),
+      new FarosProjects(config, this.logger),
+      new FarosIssues(config, this.logger),
+      new FarosBoards(config, this.logger),
+      new FarosProjectVersions(config, this.logger),
+      new FarosProjectVersionIssues(config, this.logger),
     ];
   }
 
@@ -83,6 +91,9 @@ export class JiraSource extends AirbyteSourceBase<JiraConfig> {
         WebhookSupplementStreamNames.includes(stream.stream.name)
       );
     }
-    return {config, catalog: {streams}, state};
+    const requestedStreams = new Set(
+      streams.map((stream) => stream.stream.name)
+    );
+    return {config: {...config, requestedStreams}, catalog: {streams}, state};
   }
 }

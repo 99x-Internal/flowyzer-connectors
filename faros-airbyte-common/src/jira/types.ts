@@ -8,6 +8,7 @@ export interface IssueCompact {
   readonly created?: Date;
   readonly updated?: Date;
   readonly boardId?: string;
+  readonly url?: string;
 }
 
 export interface Issue extends IssueCompact {
@@ -34,6 +35,7 @@ export interface Issue extends IssueCompact {
   readonly url: string;
   readonly resolution: string;
   readonly resolutionDate: Date;
+  readonly organization?: string;
 }
 
 export interface Parent {
@@ -66,6 +68,14 @@ export interface SprintHistory {
 export interface SprintInfo {
   readonly currentSprintId: string;
   readonly history: ReadonlyArray<SprintHistory>;
+  state: string;
+  name: string;
+  startDate: Date;
+  endDate: Date;
+  completeDate: Date;
+  createdDate: Date;
+  id: number;
+  uid?: string;
 }
 
 export enum RepoSource {
@@ -74,7 +84,7 @@ export enum RepoSource {
   GIT_FOR_JIRA_CLOUD = 'GitForJiraCloud',
   GITLAB = 'GitLab',
   VCS = 'VCS',
-  AZURE = 'AZURE-REPOS',
+  AZURE = 'AzureDevOps',
 }
 
 export interface Repo {
@@ -93,20 +103,58 @@ export interface PullRequest {
   readonly repo: Repo;
   readonly number: number;
   readonly issue?: PullRequestIssue;
-}
-
-export interface PullRequest {
-  readonly repo: Repo;
-  readonly number: number;
-  readonly issue?: PullRequestIssue;
   repoUrl: string;
   title: string;
   state: PullRequestState;
   origin: string;
   mergedAt: string;
   author: {uid: string; source: string};
+  organization?: string;
 }
 
+export interface PullRequestStream {
+  id?: string;
+  updated: string;
+  branches?: any[];
+  _instance?: PullRequestInstance;
+  pullRequests?: PullRequestData[];
+  repositories?: [];
+}
+
+export interface PullRequestInstance {
+  id?: string;
+  name?: string;
+  type?: string;
+  baseUrl?: string;
+  typeName?: string;
+  singleInstance?: boolean;
+}
+
+export interface PullRequestData {
+  author?: PullRequestDataAuthor;
+  id?: string;
+  name?: string;
+  commentCount?: number;
+  source?: PullRequestDataBranchInfo;
+  destination?: PullRequestDataBranchInfo;
+  reviewers?: any[];
+  status?: string;
+  url?: string;
+  lastUpdate?: string;
+  repositoryId?: string;
+  repositoryName?: string;
+  repositoryUrl?: string;
+}
+
+export interface PullRequestDataAuthor {
+  name: string;
+  avatar: string;
+}
+
+export interface PullRequestDataBranchInfo {
+  branch: string;
+  url: string;
+}
 export interface PullRequestState {
   category: PullRequestStateCategory;
   detail: string;
@@ -119,20 +167,28 @@ export enum PullRequestStateCategory {
   Custom = 'Custom',
 }
 
+export interface Status {
+  readonly category: string;
+  readonly detail: string;
+}
+
+export interface StatusValue {
+  oldValue: string;
+  newValue: string;
+}
+
 export interface Sprint extends AgileModels.Sprint {
   // The date the sprint is opened in Jira Server
   readonly activatedDate?: string;
+  // Board sprint is associated that can be not originBoardId
+  // https://support.atlassian.com/jira-software-cloud/docs/view-and-understand-the-sprint-report/
+  readonly boardId: number;
 }
 
 export interface SprintReport {
-  readonly id: number;
-  readonly boardId?: string;
-  readonly closedAt?: Date;
-  readonly completedPoints?: number;
-  readonly completedInAnotherSprintPoints?: number;
-  readonly notCompletedPoints?: number;
-  readonly puntedPoints?: number;
-  readonly plannedPoints?: number;
+  readonly sprintId: number;
+  readonly boardId: string;
+  readonly completeDate: Date;
   readonly issues: SprintIssue[];
 }
 
@@ -151,4 +207,27 @@ export interface IssueField {
 
 export interface User extends Version2Models.User {
   id: string;
+}
+
+export interface Board extends AgileModels.Board {
+  uid: string;
+  projectKey: string;
+}
+
+export interface Project extends AgileModels.Project {
+  self: string;
+  description: string;
+}
+export interface ProjectVersion extends Version2Models.Version {
+  projectKey: string;
+}
+
+export interface IssueProjectVersion {
+  readonly key: string;
+  readonly projectVersionId: string;
+}
+
+export interface FarosProject {
+  key: string;
+  boardUids: string[];
 }

@@ -1,4 +1,5 @@
 import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {PullRequest} from 'faros-airbyte-common/jira';
 import {toLower} from 'lodash';
 
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
@@ -9,29 +10,53 @@ export class FarosIssuePullRequests extends JiraConverter {
     'tms_TaskPullRequestAssociation',
   ];
 
+  protected getRepoNameFromPullRequestUrl(
+    url?: string,
+    source?: string
+  ): string {
+    if (url) {
+      if (toLower(source).indexOf('azure') > -1) {
+        return url.split('/')[5];
+      } else {
+        return '';
+      }
+    } else {
+      return '';
+    }
+  }
+
   async convert(
     record: AirbyteRecord,
     ctx: StreamContext
   ): Promise<ReadonlyArray<DestinationRecord>> {
-    const pullRequest = record.record.data;
+    const pullRequest = record.record.data as PullRequest;
     const source = this.streamName.source;
+    const organizationName = this.getOrganizationFromUrl(
+      pullRequest.organization
+    );
+    const repoName = this.getRepoNameFromPullRequestUrl(
+      pullRequest.repo.name,
+      pullRequest.repo.source
+    );
+    const organization = {uid: organizationName, source};
     return [
       {
         model: 'tms_TaskPullRequestAssociation',
         record: {
           task: {
-            uid: pullRequest.issue.key,
+            uid: `${pullRequest.issue.key}`,
             source,
+            organization,
           },
           pullRequest: {
+            uid: `${pullRequest.issue.key}`,
             repository: {
-              organization: {
-                source: pullRequest.repo.source,
-                uid: toLower(pullRequest.repo.org),
-              },
+              uid: repoName,
+              organization,
               name: toLower(pullRequest.repo.name),
             },
             number: pullRequest.number,
+            origin: 'jira',
           },
         },
       },
