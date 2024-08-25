@@ -1,6 +1,5 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {User} from 'faros-airbyte-common/jira';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {User} from '../../../../../faros-airbyte-common/lib/jira';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
 

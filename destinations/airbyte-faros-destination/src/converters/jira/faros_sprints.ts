@@ -1,9 +1,9 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {SprintState} from 'faros-airbyte-common/common';
-import {Sprint} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import {camelCase, upperFirst} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {SprintState} from '../../../../../faros-airbyte-common/lib/common';
+import {Sprint} from '../../../../../faros-airbyte-common/lib/jira';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
 

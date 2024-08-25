@@ -1,13 +1,13 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {Utils} from 'faros-js-client';
+import {camelCase, isNil, pick, upperFirst} from 'lodash';
+
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {
   FlowzyerTask,
   TaskAdditionalField,
   TaskStatusChangeLog,
-} from 'faros-airbyte-common/common';
-import {Issue} from 'faros-airbyte-common/jira';
-import {Utils} from 'faros-js-client';
-import {camelCase, isNil, pick, upperFirst} from 'lodash';
-
+} from '../../../../../faros-airbyte-common/lib/common';
+import {Issue} from '../../../../../faros-airbyte-common/lib/jira';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraCommon, JiraConverter} from './common';
 

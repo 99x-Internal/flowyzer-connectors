@@ -1,8 +1,8 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import parseGitUrl from 'git-url-parse';
 import {toLower} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JenkinsCommon, JenkinsConverter, RepoSource} from './common';
 

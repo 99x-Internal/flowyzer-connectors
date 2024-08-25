@@ -1,6 +1,5 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {ProjectUser} from 'faros-airbyte-common/bitbucket-server';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {ProjectUser} from '../../../../../faros-airbyte-common/lib/bitbucket-server';
 import {DestinationModel, DestinationRecord} from '../converter';
 import {BitbucketServerConverter} from './common';
 

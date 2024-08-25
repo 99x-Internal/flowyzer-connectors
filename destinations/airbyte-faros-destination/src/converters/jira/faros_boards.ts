@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {Board} from 'faros-airbyte-common/jira';
 import {toString} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {Board} from '../../../../../faros-airbyte-common/lib/jira';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
 export class FarosBoards extends JiraConverter {

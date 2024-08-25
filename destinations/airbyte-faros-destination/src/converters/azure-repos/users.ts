@@ -50,7 +50,6 @@ export class Users extends AzureReposConverter {
         email: userItem.mailAddress,
         organization,
         source,
-        organization,
       },
     });
     // }

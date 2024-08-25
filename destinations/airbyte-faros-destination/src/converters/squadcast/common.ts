@@ -1,5 +1,4 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Converter, parseObjectConfig, StreamContext} from '../converter';
 
 export type ApplicationMapping = Record<

@@ -1,5 +1,4 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk/lib';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {
   Converter,
   DestinationModel,

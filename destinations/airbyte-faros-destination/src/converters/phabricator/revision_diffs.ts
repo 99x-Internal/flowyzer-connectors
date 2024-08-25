@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {FileDiff} from 'faros-airbyte-common/common';
 import {Dictionary} from 'ts-essentials';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {FileDiff} from '../../../../../faros-airbyte-common/lib/common';
 import {processPullRequestFileDiffs} from '../common/vcs';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {PhabricatorCommon, PhabricatorConverter} from './common';

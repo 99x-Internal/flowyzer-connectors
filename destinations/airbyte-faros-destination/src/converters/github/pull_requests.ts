@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import {camelCase, toLower, upperFirst} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {RepoKey} from '../common/vcs';
 import {DestinationModel, DestinationRecord} from '../converter';
 import {GitHubCommon} from './common';

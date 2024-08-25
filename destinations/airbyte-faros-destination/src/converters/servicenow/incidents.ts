@@ -1,8 +1,11 @@
-import {AirbyteRecord, DestinationSyncMode} from 'faros-airbyte-cdk';
 import {FarosClient, paginatedQueryV2, Utils} from 'faros-js-client';
 import {isNil} from 'lodash';
 import {Dictionary} from 'ts-essentials';
 
+import {
+  AirbyteRecord,
+  DestinationSyncMode,
+} from '../../../../../faros-airbyte-cdk/lib';
 import {Common} from '../common/common';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {

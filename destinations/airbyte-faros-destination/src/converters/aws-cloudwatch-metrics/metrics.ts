@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import {VError} from 'verror';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {
   Converter,
   DestinationModel,

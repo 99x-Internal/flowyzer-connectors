@@ -1,6 +1,6 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import VError from 'verror';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Common, ComputeApplication} from '../common/common';
 import {
   Converter,

@@ -1,9 +1,9 @@
 import {ok} from 'assert';
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {FarosGraphSchema} from 'faros-js-client';
 import jsonata from 'jsonata';
 import {VError} from 'verror';
 
+import {AirbyteRecord} from '../../../../faros-airbyte-cdk/lib';
 import {
   Converter,
   DestinationModel,

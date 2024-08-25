@@ -1,5 +1,4 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Converter, StreamContext} from '../converter';
 
 export const ARTIFACT_TYPE = 'Docker';

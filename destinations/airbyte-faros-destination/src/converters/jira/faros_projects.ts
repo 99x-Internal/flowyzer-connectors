@@ -1,8 +1,8 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {Project} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import {toString} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {Project} from '../../../../../faros-airbyte-common/lib/jira';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
 

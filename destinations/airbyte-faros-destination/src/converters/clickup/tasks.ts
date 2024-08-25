@@ -1,6 +1,5 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {Goal, Task} from 'faros-airbyte-common/clickup';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {Goal, Task} from '../../../../../faros-airbyte-common/lib/clickup';
 import {
   DestinationModel,
   DestinationRecord,
