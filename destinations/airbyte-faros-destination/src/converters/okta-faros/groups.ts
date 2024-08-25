@@ -1,5 +1,4 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord} from '../converter';
 import {Groups as OktaGroups} from '../okta/groups';
 import {OktaFarosConverter} from './common';

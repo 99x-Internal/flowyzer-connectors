@@ -1,4 +1,3 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import {
   camelCase,
@@ -10,6 +9,7 @@ import {
 } from 'lodash';
 import {Dictionary} from 'ts-essentials';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {
   DestinationModel,
   DestinationRecord,

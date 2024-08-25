@@ -1,7 +1,10 @@
-import {AirbyteLogger, AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import GitUrlParse from 'git-url-parse';
 
+import {
+  AirbyteLogger,
+  AirbyteRecord,
+} from '../../../../../faros-airbyte-cdk/lib';
 import {Common} from '../common/common';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {OctopusConverter} from './common';

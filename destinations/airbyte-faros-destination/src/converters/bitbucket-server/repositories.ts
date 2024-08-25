@@ -1,6 +1,8 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {Repository, selfHRef} from 'faros-airbyte-common/bitbucket-server';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {
+  Repository,
+  selfHRef,
+} from '../../../../../faros-airbyte-common/lib/bitbucket-server';
 import {BitbucketCommon} from '../bitbucket/common';
 import {DestinationModel, DestinationRecord} from '../converter';
 import {BitbucketServerConverter} from './common';

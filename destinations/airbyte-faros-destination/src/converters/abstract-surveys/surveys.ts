@@ -1,8 +1,8 @@
 import {createHash} from 'crypto';
-import {AirbyteRecord, toDate} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import _ from 'lodash';
 
+import {AirbyteRecord, toDate} from '../../../../../faros-airbyte-cdk/lib';
 import {
   Converter,
   DestinationModel,

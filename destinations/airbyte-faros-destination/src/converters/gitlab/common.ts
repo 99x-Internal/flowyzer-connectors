@@ -1,6 +1,6 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Converter, DestinationRecord} from '../converter';
 
 export interface CategoryRef {

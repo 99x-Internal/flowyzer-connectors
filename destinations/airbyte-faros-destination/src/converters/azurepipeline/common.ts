@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import {toLower} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Converter, StreamContext} from '../converter';
 import {
   BuildStateCategory,

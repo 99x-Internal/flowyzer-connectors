@@ -1,6 +1,6 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {DateTime} from 'luxon';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {TestRailsConverter} from './common';
 

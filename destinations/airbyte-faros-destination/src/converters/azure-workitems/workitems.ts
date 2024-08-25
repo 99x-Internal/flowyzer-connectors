@@ -1,11 +1,8 @@
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {
   FlowzyerTask,
-  TaskStatus,
   TaskStatusChangeLog,
-  TaskType,
-} from 'faros-airbyte-common/common';
-
-import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+} from '../../../../../faros-airbyte-common/lib/common';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {AzureWorkitemsConverter} from './common';
 import {CustomWorkItem} from './models';

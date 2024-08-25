@@ -1,14 +1,3 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {
-  Assignee,
-  PullRequest,
-  PullRequestState,
-  PullRequestStateCategory,
-  PullRequestStream,
-  Repo,
-  RepoSource,
-  Status,
-} from 'faros-airbyte-common/jira';
 import {Utils} from 'faros-js-client';
 import parseGitUrl from 'git-url-parse';
 import {
@@ -23,6 +12,17 @@ import {
 import {Dictionary} from 'ts-essentials';
 import TurndownService from 'turndown';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {
+  Assignee,
+  PullRequest,
+  PullRequestState,
+  PullRequestStateCategory,
+  PullRequestStream,
+  Repo,
+  RepoSource,
+  Status,
+} from '../../../../../faros-airbyte-common/lib/jira';
 import {
   DestinationModel,
   DestinationRecord,

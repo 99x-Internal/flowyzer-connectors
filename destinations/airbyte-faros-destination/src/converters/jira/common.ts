@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {isString} from 'lodash';
 import {Dictionary} from 'ts-essentials';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Converter, StreamContext} from '../converter';
 
 export interface SprintIssue {

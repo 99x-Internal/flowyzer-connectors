@@ -1,8 +1,11 @@
-import {AirbyteRecord, DestinationSyncMode} from 'faros-airbyte-cdk';
 import {paginatedQueryV2, Utils} from 'faros-js-client';
 import {isNil} from 'lodash';
 import _ from 'lodash';
 
+import {
+  AirbyteRecord,
+  DestinationSyncMode,
+} from '../../../../../faros-airbyte-cdk/lib';
 import {
   DestinationModel,
   DestinationRecord,

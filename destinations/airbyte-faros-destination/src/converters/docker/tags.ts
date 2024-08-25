@@ -1,6 +1,9 @@
-import {AirbyteLogger, AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 
+import {
+  AirbyteLogger,
+  AirbyteRecord,
+} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {
   ARTIFACT_TYPE,

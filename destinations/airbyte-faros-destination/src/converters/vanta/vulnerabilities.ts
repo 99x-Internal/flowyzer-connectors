@@ -1,6 +1,6 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {FarosClient} from 'faros-js-client';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 // import fs
 // import fs from 'fs-extra';
 import {

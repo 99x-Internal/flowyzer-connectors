@@ -1,6 +1,6 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {z} from 'zod';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Converter, StreamContext} from '../converter';
 
 // Zod shorthand validators for common validation

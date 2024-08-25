@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {PullRequest} from 'faros-airbyte-common/jira';
 import {toLower} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {PullRequest} from '../../../../../faros-airbyte-common/lib/jira';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {JiraConverter} from './common';
 

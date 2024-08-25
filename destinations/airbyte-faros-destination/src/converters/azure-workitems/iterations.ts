@@ -1,7 +1,7 @@
-import {SprintState} from 'faros-airbyte-common/common';
 import {camelCase, upperFirst} from 'lodash';
 
 import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {SprintState} from '../../../../../faros-airbyte-common/lib/common';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {AzureWorkitemsConverter} from './common';
 import {Iteration} from './models';

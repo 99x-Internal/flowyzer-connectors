@@ -1,6 +1,6 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {paginatedQueryV2} from 'faros-js-client';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {PagerDutyConverter, PagerdutyObject} from './common';
 

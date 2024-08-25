@@ -145,8 +145,8 @@ export function strictPick(
       rawValue = isDate(rawValue)
         ? rawValue.getTime()
         : isString(rawValue)
-        ? Date.parse(rawValue)
-        : rawValue;
+          ? Date.parse(rawValue)
+          : rawValue;
     }
     return rawValue ?? nullValue;
   }

@@ -1,7 +1,10 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {PullRequest, selfHRef} from 'faros-airbyte-common/bitbucket-server';
 import {Utils} from 'faros-js-client';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {
+  PullRequest,
+  selfHRef,
+} from '../../../../../faros-airbyte-common/lib/bitbucket-server';
 import {CategoryRef} from '../bitbucket/common';
 import {DestinationModel, DestinationRecord} from '../converter';
 import {BitbucketServerConverter} from './common';

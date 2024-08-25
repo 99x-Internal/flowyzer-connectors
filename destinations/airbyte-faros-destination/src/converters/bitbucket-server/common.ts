@@ -1,6 +1,8 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {selfHRef, User} from 'faros-airbyte-common/bitbucket-server';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {
+  selfHRef,
+  User,
+} from '../../../../../faros-airbyte-common/lib/bitbucket-server';
 import {UserTypeCategory} from '../bitbucket/common';
 import {OrgKey, RepoKey, UserKey} from '../common/vcs';
 import {Converter, DestinationRecord} from '../converter';

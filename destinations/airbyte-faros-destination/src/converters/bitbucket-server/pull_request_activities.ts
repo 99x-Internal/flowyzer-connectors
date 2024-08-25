@@ -1,12 +1,12 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
+import {Utils} from 'faros-js-client';
+
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {
   isPullRequestComment,
   isPullRequestMerge,
   isPullRequestReview,
   PullRequestActivity,
-} from 'faros-airbyte-common/bitbucket-server';
-import {Utils} from 'faros-js-client';
-
+} from '../../../../../faros-airbyte-common/lib/bitbucket-server';
 import {MAX_DESCRIPTION_LENGTH} from '../azure-repos/common';
 import {DestinationModel, DestinationRecord} from '../converter';
 import {BitbucketServerConverter} from './common';

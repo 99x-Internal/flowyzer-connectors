@@ -1,6 +1,6 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import _ from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {Converter, DestinationModel, DestinationRecord} from '../converter';
 import {JenkinsCommon} from '../jenkins/common';
 

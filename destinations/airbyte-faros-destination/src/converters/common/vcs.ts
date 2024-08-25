@@ -1,6 +1,6 @@
-import {FileDiff} from 'faros-airbyte-common/common';
 import {uniq} from 'lodash';
 
+import {FileDiff} from '../../../../../faros-airbyte-common/lib/common';
 import {DestinationRecord} from '../converter';
 
 const NULL = '/dev/null';

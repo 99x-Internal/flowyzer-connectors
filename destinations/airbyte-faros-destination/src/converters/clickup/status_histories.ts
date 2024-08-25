@@ -1,7 +1,7 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-import {StatusHistory} from 'faros-airbyte-common/clickup';
 import {sortBy} from 'lodash';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
+import {StatusHistory} from '../../../../../faros-airbyte-common/lib/clickup';
 import {DestinationModel, DestinationRecord, StreamContext} from '../converter';
 import {ClickUpCommon, ClickUpConverter} from './common';
 

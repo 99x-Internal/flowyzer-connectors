@@ -1,8 +1,8 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
 import {Utils} from 'faros-js-client';
 import {toLower} from 'lodash';
 import {Dictionary} from 'ts-essentials';
 
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {DestinationModel, DestinationRecord} from '../converter';
 import {DatadogConverter} from './common';
 

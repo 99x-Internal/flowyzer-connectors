@@ -1,14 +1,14 @@
-import {
-  AirbyteLogger,
-  AirbyteRecord,
-  DestinationSyncMode,
-} from 'faros-airbyte-cdk';
 import {FarosClient} from 'faros-js-client';
 import {snakeCase} from 'lodash';
 import sizeof from 'object-sizeof';
 import {Dictionary} from 'ts-essentials';
 import {VError} from 'verror';
 
+import {
+  AirbyteLogger,
+  AirbyteRecord,
+  DestinationSyncMode,
+} from '../../../../faros-airbyte-cdk/lib';
 import {DestinationConfig} from '../common/types';
 
 /** Airbyte -> Faros record converter */
@@ -136,7 +136,10 @@ export const StreamNameSeparator = '__';
  * }
  */
 export class StreamName {
-  constructor(readonly source: string, readonly name: string) {}
+  constructor(
+    readonly source: string,
+    readonly name: string
+  ) {}
 
   private str: string;
 

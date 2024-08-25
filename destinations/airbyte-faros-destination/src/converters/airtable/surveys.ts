@@ -1,5 +1,4 @@
-import {AirbyteRecord} from 'faros-airbyte-cdk';
-
+import {AirbyteRecord} from '../../../../../faros-airbyte-cdk/lib';
 import {AbstractSurveys} from '../abstract-surveys/surveys';
 
 export class Surveys extends AbstractSurveys {
