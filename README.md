@@ -1,3 +1,23 @@
+# Building Docker iamges
+
+``` 
+docker build -f Dockerfile.destination .  --no-cache --build-arg version=0.3.02-release -t bksdrodrigo/airbyte-faros-destination-99x:0.3.02-release
+
+docker build -f Dockerfile.source .  --no-cache --build-arg project=azure-repos-source --build-arg version=0.3.02-release -t bksdrodrigo/azure-repos-source-99x:0.3.02-release
+docker run --rm bksdrodrigo/azure-repos-source-99x:0.3.02-release spec
+docker run --rm -v $(pwd)/secrets:/secrets bksdrodrigo/azure-repos-source-99x:0.3.02-release check --config /secrets/config.json
+docker run --rm -v $(pwd)/secrets:/secrets bksdrodrigo/azure-repos-source-99x:0.3.02-release discover --config /secrets/config.json
+docker run --rm -v $(pwd)/secrets:/secrets -v $(pwd)/test_files:/test_files bksdrodrigo/azure-repos-source-99x:0.3.02-release read --config /secrets/config.json --catalog /test_files/full_configured_catalog.json
+
+
+docker build -f Dockerfile.source .  --no-cache --build-arg project=azure-workitems-source --build-arg version=0.3.02-release -t bksdrodrigo/azure-workitems-source-99x:0.3.02-release
+docker run --rm bksdrodrigo/azure-workitems-source-99x:0.3.02-release spec
+docker run --rm -v $(pwd)/secrets:/secrets bksdrodrigo/azure-workitems-source-99x:0.3.02-release check --config /secrets/config.json
+docker run --rm -v $(pwd)/secrets:/secrets bksdrodrigo/azure-workitems-source-99x:0.3.02-release discover --config /secrets/config.json
+docker run --rm -v $(pwd)/secrets:/secrets -v $(pwd)/test_files:/test_files bksdrodrigo/azure-workitems-source-99x:0.3.02-release read --config /secrets/config.json --catalog /test_files/full_configured_catalog.json
+
+```
+
 # Airbyte Connectors
 
 [![CI](https://github.com/faros-ai/airbyte-connectors/actions/workflows/ci.yml/badge.svg)](https://github.com/faros-ai/airbyte-connectors/actions/workflows/ci.yml) [![Release](https://github.com/faros-ai/airbyte-connectors/actions/workflows/release.yml/badge.svg)](https://github.com/faros-ai/airbyte-connectors/actions/workflows/release.yml) [![CodeQL](https://github.com/faros-ai/airbyte-connectors/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/faros-ai/airbyte-connectors/actions/workflows/codeql-analysis.yml) [![Tag](https://img.shields.io/github/v/release/faros-ai/airbyte-connectors?label=Latest%20Release)](https://github.com/faros-ai/airbyte-connectors/releases/latest)
